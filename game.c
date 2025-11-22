@@ -2,19 +2,33 @@
 #include <stdint.h>
 #include <SDL2/SDL.h>
 #include "./game.h"
+#include "./player.h"
 #include "./screen.h"
 
 int tick_count = 0;
 int pixels[SCREEN_WIDTH * SCREEN_HEIGHT];
 
+Player player = (Player) {.px = 22, 
+			  .py = 12,
+			  .pa = 1.5,
+			  .dir_x = -1,
+			  .dir_y = 0,
+			  .plane_x = 0,
+			  .plane_y = 0.66
+			 };
+Screen screen = (Screen) {0};
+
+
 void update(void)
 {
+    player_handle_input(&screen, &player);
     tick_count++;
 }
 
 void render(SDL_Renderer* renderer, SDL_Texture* texture)
 {
-    screen_render(&pixels);
+    memset(pixels, 0, SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(int));
+    screen_render_map(&screen, &player);
 
     SDL_UpdateTexture(texture, 0, pixels, SCREEN_WIDTH * sizeof(int));
     SDL_RenderClear(renderer);
@@ -41,6 +55,7 @@ void run_loop(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture)
 		running = 0;
 		return;
 	    }
+
 	}
 
 	uint64_t now = SDL_GetPerformanceCounter();
@@ -104,6 +119,8 @@ int main(void)
 	SDL_Quit();
 	return 1;
     }
+
+    screen = screen_init(pixels);
 
     run_loop(window, renderer, texture);
 
