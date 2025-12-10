@@ -15,6 +15,7 @@ Screen screen_init(int* pixels)
     screen.pixels = pixels;
 
     screen.wall_tex = screen_read_image("./res/wall.png");
+    screen.ground_tex = screen_read_image("./res/ground.png");
 
     return screen;
 }
@@ -53,10 +54,51 @@ GameImage screen_read_image(char* file_path)
     return img;
 }
 
+void screen_render_floor(Screen* screen, Player* player)
+{
+    for (int y = 0; y < SCREEN_HEIGHT; y++) {
+	float rdx0 = player->dir_x - player->plane_x;
+	float rdx1 = player->dir_x + player->plane_x;
+	float rdy0 = player->dir_y - player->plane_y;
+	float rdy1 = player->dir_y + player->plane_y;
+
+	int p = y - SCREEN_HEIGHT / 2;
+	float z = (float)SCREEN_HEIGHT / 2;
+	float row_dist = z / p;
+
+	float step_x = row_dist * (rdx1 - rdx0) / SCREEN_WIDTH;
+	float step_y = row_dist * (rdy1 - rdy0) / SCREEN_WIDTH;
+
+	float floor_x = player->px + row_dist * rdx0;
+	float floor_y = player->py + row_dist * rdy0;
+
+	for (int x = 0; x < SCREEN_WIDTH; x++) {
+	    int cell_x = (int)floor_x;
+	    int cell_y = (int)floor_y;
+
+	    int tx = (int)(IMG_WIDTH * (floor_x - cell_x)) & 15;
+	    int ty = (int)(IMG_HEIGHT * (floor_y - cell_y)) & 15;
+
+	    floor_x += step_x;
+	    floor_y += step_y;
+
+	    // Floor
+	    int color = screen->ground_tex.pixels[IMG_WIDTH * ty + tx];
+	    color = (color >> 1) & 8355711; // More darker
+	    screen->pixels[y * SCREEN_WIDTH + x] = color;
+	
+	    // Celling
+	    screen->pixels[(SCREEN_HEIGHT - y - 1) * SCREEN_WIDTH + x] = color;
+	}
+    }
+}
+
 // TODO: Function is too long. Seperate into multiple functions
 void screen_render_map(Screen* screen, Player* player)
 {
-    for (size_t x = 0; x < SCREEN_WIDTH; x++) {
+    screen_render_floor(screen, player);
+
+    for (int x = 0; x < SCREEN_WIDTH; x++) {
 	double camera_x = 2 * x / (double)SCREEN_WIDTH - 1;
 	double ray_dir_x = player->dir_x + player->plane_x * camera_x;
 	double ray_dir_y = player->dir_y + player->plane_y * camera_x;
@@ -142,18 +184,6 @@ void screen_render_map(Screen* screen, Player* player)
 	    
 	    screen->pixels[y * SCREEN_WIDTH + x] = color;
 	}
-
-	screen_render_floor(screen, x, draw_start, draw_end);
-    }
-}
-
-void screen_render_floor(Screen* screen, int x, int draw_start, int draw_end)
-{
-    for (int y = 0; y < draw_start; y++) {
-	screen->pixels[y * SCREEN_WIDTH + x] = 0xAAAAAA;
-    }
-    for (int y = draw_end; y < SCREEN_HEIGHT; y++) {
-	screen->pixels[y * SCREEN_WIDTH + x] = 0x444444;
     }
 }
 

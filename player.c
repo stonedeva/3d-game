@@ -11,33 +11,6 @@ Player player_init()
     };
 }
 
-/*
-void player_forward(Player* p)
-{
-    double nx = p->px + cos(p->pa) * PLAYER_SPEED;
-    double ny = p->py + sin(p->pa) * PLAYER_SPEED;
-
-    if (screen_map[(int)nx][(int)p->py] == 0) p->px = nx;
-    if (screen_map[(int)p->px][(int)ny] == 0) p->py = ny;
-}
-
-void player_backward(Player* p)
-{
-    double nx = p->px - cos(p->pa) * PLAYER_SPEED;
-    double ny = p->py - sin(p->pa) * PLAYER_SPEED;
-    
-    if (screen_map[(int)nx][(int)p->py] == 0) p->px = nx;
-    if (screen_map[(int)p->px][(int)ny] == 0) p->py = ny;
-}
-
-void player_rotate(Player* p, double units)
-{
-    p->pa += units;
-
-    if (p->pa < 0) p->pa += 2 * M_PI;
-    if (p->pa >= 2 * M_PI) p->pa -= 2 * M_PI;
-}*/
-
 void player_handle_input(Screen* screen, Player* p)
 {
     double dir_x = p->dir_x;

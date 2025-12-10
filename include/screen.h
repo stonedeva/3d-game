@@ -19,6 +19,7 @@ typedef struct {
 typedef struct {
     int* pixels;
     GameImage wall_tex;
+    GameImage ground_tex;
 } Screen;
 
 /* TODO: Temporary solution to avoid circular includes */
@@ -53,7 +54,7 @@ static int screen_map[MAP_WIDTH][MAP_HEIGHT] = {
 
 Screen screen_init(int* pixels);
 void screen_render_map(Screen* screen, Player* player);
-void screen_render_floor(Screen* screen, int x, int draw_start, int draw_end);
+void screen_render_floor(Screen* screen, Player* player);
 void screen_clear(Screen* screen);
 
 GameImage screen_read_image(char* file_path);
