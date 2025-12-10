@@ -1,7 +1,9 @@
 #include "./screen.h"
 #include "./player.h"
 #include "./game.h"
-#include <stddef.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <math.h>
@@ -9,94 +11,51 @@
 
 Screen screen_init(int* pixels)
 {
-    return (Screen) {
-	.pixels = pixels,
-	.pos_x = 22,
-	.pos_y = 12,
-	.dir_x = -1,
-	.dir_y = 0,
-	.plane_x = 0,
-	.plane_y = 0.66
-    };
+    Screen screen = {0};
+    screen.pixels = pixels;
+
+    screen.wall_tex = screen_read_image("./res/wall.png");
+
+    return screen;
 }
-/*
-void screen_render_map(Screen* screen, double px, double py, double pa)
+
+GameImage screen_read_image(char* file_path)
 {
-    for (size_t x = 0; x < SCREEN_WIDTH; x++) {
-        double camera_x = 2.0 * x / SCREEN_WIDTH - 1.0;        // -1 to +1
-        double ray_dir_x = cos(pa) + camera_x * -sin(pa);
-        double ray_dir_y = sin(pa) + camera_x *  cos(pa);
+    SDL_Surface* surface = IMG_Load(file_path);
+    if (!surface) {
+	fprintf(stderr, "screen_read_image(): Could not read image file\n");
+	exit(1);
+    }
+    uint8_t* p = (uint8_t*)surface->pixels;
 
-        int map_x = (int)px;
-        int map_y = (int)py;
+    /* 8 bit for r,g,b (0-255 each) */
+    if (surface->format->BitsPerPixel != 24) {
+	fprintf(stderr, "BitsPerPixel != 24: Could not read image file\n");
+	SDL_FreeSurface(surface);
+	exit(1);
+    }
 
-        double delta_dist_x = (ray_dir_x == 0) ? 1e30 : fabs(1 / ray_dir_x);
-        double delta_dist_y = (ray_dir_y == 0) ? 1e30 : fabs(1 / ray_dir_y);
-
-        int step_x, step_y;
-        double side_dist_x, side_dist_y;
-
-        if (ray_dir_x < 0) {
-            step_x = -1;
-            side_dist_x = (px - map_x) * delta_dist_x;
-        } else {
-            step_x = 1;
-            side_dist_x = (map_x + 1.0 - px) * delta_dist_x;
-        }
-
-        if (ray_dir_y < 0) {
-            step_y = -1;
-            side_dist_y = (py - map_y) * delta_dist_y;
-        } else {
-            step_y = 1;
-            side_dist_y = (map_y + 1.0 - py) * delta_dist_y;
-        }
-
-        int hit = 0;
-        int side;
-        while (!hit) {
-            if (side_dist_x < side_dist_y) {
-                side_dist_x += delta_dist_x;
-                map_x += step_x;
-                side = 0;
-            } else {
-                side_dist_y += delta_dist_y;
-                map_y += step_y;
-                side = 1;
-            }
-
-            if (screen_map[map_x][map_y] > 0) hit = 1;
-        }
-
-        double perp_dist =
-            side == 0 ? (side_dist_x - delta_dist_x)
-                      : (side_dist_y - delta_dist_y);
-
-        int line_height = (int)(SCREEN_HEIGHT / perp_dist);
-
-        int draw_start = -line_height / 2 + SCREEN_HEIGHT / 2;
-        if (draw_start < 0) {
-	    draw_start = 0;
-	}
-
-        int draw_end = line_height / 2 + SCREEN_HEIGHT / 2;
-        if (draw_end >= SCREEN_HEIGHT) {
-	    draw_end = SCREEN_HEIGHT - 1;
-	}
-
-        uint32_t color = side ? 0xAA0000 : 0xFF0000;
-
-        for (int y = draw_start; y < draw_end; y++) {
-            screen->pixels[y * SCREEN_WIDTH + x] = color;
+    GameImage img = {0};
+    for (int y = 0; y < IMG_HEIGHT; y++) {
+	for (int x = 0; x < IMG_WIDTH; x++) {
+	    uint8_t* px = p + y * surface->pitch + x * surface->format->BytesPerPixel;
+	    uint8_t r, g, b;
+	    SDL_GetRGB(*(int*)px, surface->format, &r, &g, &b);
+	    img.pixels[y * IMG_WIDTH + x] = (0xFF << 24) | (r << 16) | (g << 8) | b;
 	}
     }
-}
-*/
 
+    //memcpy(img.pixels, surface->pixels, IMG_WIDTH * IMG_HEIGHT * sizeof(int));
+    SDL_FreeSurface(surface);
+
+    printf("%02x\n", img.pixels[0]);
+
+    return img;
+}
+
+// TODO: Function is too long. Seperate into multiple functions
 void screen_render_map(Screen* screen, Player* player)
 {
-    double pa = 1.5;
-
     for (size_t x = 0; x < SCREEN_WIDTH; x++) {
 	double camera_x = 2 * x / (double)SCREEN_WIDTH - 1;
 	double ray_dir_x = player->dir_x + player->plane_x * camera_x;
@@ -143,7 +102,7 @@ void screen_render_map(Screen* screen, Player* player)
 	    if (screen_map[map_x][map_y] > 0) hit = 1;
 	}
 	
-	if (side == 0) 
+	if (side == 0)
 	    perp_wall_dist = (side_dist_x - delta_dist_x);
 	else
 	    perp_wall_dist = (side_dist_y - delta_dist_y);
@@ -158,30 +117,43 @@ void screen_render_map(Screen* screen, Player* player)
 	if (draw_end >= SCREEN_HEIGHT) {
 	    draw_end = SCREEN_HEIGHT - 1;
 	}
-
-	int color;
-	switch (screen_map[map_x][map_y]) {
-	case 1:
-	    color = 0xFF0000;
-	    break;
-	case 2:
-	    color = 0x00FF00;
-	    break;
-	case 3:
-	    color = 0x0000FF;
-	    break;
-	case 4:
-	    color = 0xFFFF00;
-	    break;
+	
+	int tex_num = 0;
+	double wall_x;
+	if (side == 0) {
+	    wall_x = player->py + perp_wall_dist * ray_dir_y;
+	} else {
+	    wall_x = player->px + perp_wall_dist * ray_dir_x;
 	}
+	wall_x -= floor((wall_x));
 
-	if (side == 1) {
-	    color = color / 2;
-	}
+	int tex_x = (int)(wall_x * (double)IMG_WIDTH);
+	if (side == 0 && ray_dir_x > 0) tex_x = IMG_WIDTH - tex_x - 1;
+	if (side == 1 && ray_dir_y < 0) tex_x = IMG_HEIGHT - tex_x - 1;
 
-	for (int y = draw_start; y <= draw_end; y++) {
+	double step = 1.0 * IMG_HEIGHT / line_height;
+	double tex_pos = (draw_start - SCREEN_HEIGHT / 2 + line_height / 2) * step;
+
+	for (int y = draw_start; y < draw_end; y++) {
+	    int tex_y = (int)tex_pos & (IMG_HEIGHT - 1);
+	    tex_pos += step;
+	    int color = screen->wall_tex.pixels[IMG_HEIGHT * tex_y + tex_x];
+	    if (side == 1) color = (color >> 1) & 8355711;
+	    
 	    screen->pixels[y * SCREEN_WIDTH + x] = color;
 	}
+
+	screen_render_floor(screen, x, draw_start, draw_end);
+    }
+}
+
+void screen_render_floor(Screen* screen, int x, int draw_start, int draw_end)
+{
+    for (int y = 0; y < draw_start; y++) {
+	screen->pixels[y * SCREEN_WIDTH + x] = 0xAAAAAA;
+    }
+    for (int y = draw_end; y < SCREEN_HEIGHT; y++) {
+	screen->pixels[y * SCREEN_WIDTH + x] = 0x444444;
     }
 }
 

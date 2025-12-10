@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 #include "./game.h"
 #include "./player.h"
 #include "./screen.h"
@@ -14,8 +15,7 @@ Player player = (Player) {.px = 22,
 			  .dir_x = -1,
 			  .dir_y = 0,
 			  .plane_x = 0,
-			  .plane_y = 0.66
-			 };
+			  .plane_y = 0.66};
 Screen screen = (Screen) {0};
 
 
@@ -27,7 +27,7 @@ void update(void)
 
 void render(SDL_Renderer* renderer, SDL_Texture* texture)
 {
-    memset(pixels, 0, SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(int));
+    //memset(pixels, 0, SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(int));
     screen_render_map(&screen, &player);
 
     SDL_UpdateTexture(texture, 0, pixels, SCREEN_WIDTH * sizeof(int));
@@ -86,6 +86,11 @@ int main(void)
 {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 	fprintf(stderr, "SDL_Init(): Could not init sdl: %s\n", SDL_GetError());
+	return 1;
+    }
+
+    if (!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG)) {
+	fprintf(stderr, "IMG_Init(): Could not init image: %s\n", IMG_GetError());
 	return 1;
     }
 
