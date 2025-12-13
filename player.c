@@ -1,6 +1,7 @@
 #include "./player.h"
 #include "./screen.h"
 #include "./game.h"
+#include <stdbool.h>
 #include <SDL2/SDL.h>
 
 Player player_init()
@@ -44,6 +45,8 @@ void player_handle_input(Screen* screen, Player* p)
 	plane_x = plane_x * cos(PLAYER_ROT_SPEED) - plane_y * sin(PLAYER_ROT_SPEED);
 	plane_y = old_plane_x * sin(PLAYER_ROT_SPEED) + plane_y * cos(PLAYER_ROT_SPEED);
     }
+
+    bool is_moving = state[SDL_SCANCODE_W] || state[SDL_SCANCODE_S];
 
     p->dir_x = dir_x;
     p->dir_y = dir_y;

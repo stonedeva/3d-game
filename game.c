@@ -73,6 +73,7 @@ void run_loop(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture)
 
 	if (SDL_GetTicks() - timer >= 1000) {
 	    printf("FPS: %d, Ticks: %d\n", frames, tick_count);
+	    printf("px: %f, py: %f\n", player.px, player.py);
 	    frames = 0;
 	    tick_count = 0;
 	    timer += 1000;

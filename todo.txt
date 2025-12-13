@@ -1,0 +1,5 @@
+- Sprites
+- Items
+- GUI
+- Door
+- More performance (higher FPS)

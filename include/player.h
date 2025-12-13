@@ -1,7 +1,7 @@
 #ifndef _PLAYER_H_
 #define _PLAYER_H_
 
-#define PLAYER_SPEED 0.05
+#define PLAYER_SPEED 0.03
 #define PLAYER_ROT_SPEED 0.03
 
 typedef struct {

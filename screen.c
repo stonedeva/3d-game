@@ -1,30 +1,39 @@
 #include "./screen.h"
 #include "./player.h"
 #include "./game.h"
+#include "./sprite.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <assert.h>
 #include <math.h>
 
+
+double zbuffer[SCREEN_WIDTH];
+SpriteManager sprite_mgr = {0};
 
 Screen screen_init(int* pixels)
 {
     Screen screen = {0};
     screen.pixels = pixels;
+    screen.camera_height = SCREEN_WIDTH / 2;
 
-    screen.wall_tex = screen_read_image("./res/wall.png");
-    screen.ground_tex = screen_read_image("./res/ground.png");
+    screen_load_texture(&screen, "./res/ground.png");
+    screen_load_texture(&screen, "./res/wall.png");
+    screen_load_texture(&screen, "./res/door.png");
+
+    sprite_load(&sprite_mgr, "./res/barrel.png", 22, 13);
 
     return screen;
 }
 
-GameImage screen_read_image(char* file_path)
+void screen_load_texture(Screen* screen, char* file_path)
 {
     SDL_Surface* surface = IMG_Load(file_path);
     if (!surface) {
-	fprintf(stderr, "screen_read_image(): Could not read image file\n");
+	fprintf(stderr, "screen_load_texture(): Could not read image file\n");
 	exit(1);
     }
     uint8_t* p = (uint8_t*)surface->pixels;
@@ -49,9 +58,18 @@ GameImage screen_read_image(char* file_path)
     //memcpy(img.pixels, surface->pixels, IMG_WIDTH * IMG_HEIGHT * sizeof(int));
     SDL_FreeSurface(surface);
 
-    printf("%02x\n", img.pixels[0]);
+    if (screen->texture_count >= TEXTURE_CAP) {
+	fprintf(stderr, "TEXTURE_CAP has been reached!\n");
+	exit(1);
+    }
+    screen->textures[screen->texture_count++] = img;
+}
 
-    return img;
+
+// TODO: Potentially move function to sprite.c
+void screen_render_sprites(Screen* screen, Player* p)
+{
+    assert(0 && "screen_render_sprites(): Not implemented yet!\n");
 }
 
 void screen_render_floor(Screen* screen, Player* player)
@@ -83,7 +101,7 @@ void screen_render_floor(Screen* screen, Player* player)
 	    floor_y += step_y;
 
 	    // Floor
-	    int color = screen->ground_tex.pixels[IMG_WIDTH * ty + tx];
+	    int color = screen->textures[0].pixels[IMG_WIDTH * ty + tx];
 	    color = (color >> 1) & 8355711; // More darker
 	    screen->pixels[y * SCREEN_WIDTH + x] = color;
 	
@@ -141,8 +159,12 @@ void screen_render_map(Screen* screen, Player* player)
 		side = 1;
 	    }
 
-	    if (screen_map[map_x][map_y] > 0) hit = 1;
+	    if (screen_map[map_x][map_y] > 0) {
+		hit = 1;
+	    }
 	}
+
+	int tex_num = screen_map[map_x][map_y];
 	
 	if (side == 0)
 	    perp_wall_dist = (side_dist_x - delta_dist_x);
@@ -160,7 +182,6 @@ void screen_render_map(Screen* screen, Player* player)
 	    draw_end = SCREEN_HEIGHT - 1;
 	}
 	
-	int tex_num = 0;
 	double wall_x;
 	if (side == 0) {
 	    wall_x = player->py + perp_wall_dist * ray_dir_y;
@@ -179,18 +200,24 @@ void screen_render_map(Screen* screen, Player* player)
 	for (int y = draw_start; y < draw_end; y++) {
 	    int tex_y = (int)tex_pos & (IMG_HEIGHT - 1);
 	    tex_pos += step;
-	    int color = screen->wall_tex.pixels[IMG_HEIGHT * tex_y + tex_x];
+	    //int color = screen->wall_tex.pixels[IMG_HEIGHT * tex_y + tex_x];
+	    int color = screen->textures[tex_num].pixels[IMG_HEIGHT * tex_y + tex_x];
 	    if (side == 1) color = (color >> 1) & 8355711;
+
+	    if (color == 0x00FFFFFF) {
+		printf("invisible color\n");
+		continue;
+	    }
 	    
 	    screen->pixels[y * SCREEN_WIDTH + x] = color;
 	}
+
+	zbuffer[x] = perp_wall_dist;
     }
 }
 
-void screen_clear(Screen* screen)
+void screen_redraw(Screen* screen)
 {
-    for (size_t i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; i++) {
-	screen->pixels[i] = 0;
-    }
+    memset(screen->pixels, 0, SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(int));
 }
 
