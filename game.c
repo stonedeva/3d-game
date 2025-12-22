@@ -9,19 +9,14 @@
 int tick_count = 0;
 int pixels[SCREEN_WIDTH * SCREEN_HEIGHT];
 
-Player player = (Player) {.px = 22, 
-			  .py = 12,
-			  .pa = 1.5,
-			  .dir_x = -1,
-			  .dir_y = 0,
-			  .plane_x = 0,
-			  .plane_y = 0.66};
-Screen screen = (Screen) {0};
+// Forward declaration
+Player player;
+Screen screen;
 
 
 void update(void)
 {
-    player_handle_input(&screen, &player);
+    player_handle_input(&player);
     tick_count++;
 }
 
@@ -73,7 +68,6 @@ void run_loop(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture)
 
 	if (SDL_GetTicks() - timer >= 1000) {
 	    printf("FPS: %d, Ticks: %d\n", frames, tick_count);
-	    printf("px: %f, py: %f\n", player.px, player.py);
 	    frames = 0;
 	    tick_count = 0;
 	    timer += 1000;
@@ -126,6 +120,7 @@ int main(void)
 	return 1;
     }
 
+    player = player_init();
     screen = screen_init(pixels);
 
     run_loop(window, renderer, texture);

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <SDL2/SDL_image.h>
 
+
 void sprite_load(SpriteManager* manager, char* file_path, double x, double y)
 {
     SDL_Surface* surface = IMG_Load(file_path);
@@ -32,4 +33,9 @@ void sprite_load(SpriteManager* manager, char* file_path, double x, double y)
 	exit(1);
     }
     manager->sprites[manager->sprite_count++] = sprite;
+}
+
+void sprite_render()
+{
+
 }

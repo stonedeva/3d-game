@@ -2,6 +2,7 @@
 #include "./player.h"
 #include "./game.h"
 #include "./sprite.h"
+#include "./vec2.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <stdio.h>
@@ -11,7 +12,6 @@
 #include <math.h>
 
 
-double zbuffer[SCREEN_WIDTH];
 SpriteManager sprite_mgr = {0};
 
 Screen screen_init(int* pixels)
@@ -66,19 +66,13 @@ void screen_load_texture(Screen* screen, char* file_path)
 }
 
 
-// TODO: Potentially move function to sprite.c
-void screen_render_sprites(Screen* screen, Player* p)
-{
-    assert(0 && "screen_render_sprites(): Not implemented yet!\n");
-}
-
 void screen_render_floor(Screen* screen, Player* player)
 {
     for (int y = 0; y < SCREEN_HEIGHT; y++) {
-	float rdx0 = player->dir_x - player->plane_x;
-	float rdx1 = player->dir_x + player->plane_x;
-	float rdy0 = player->dir_y - player->plane_y;
-	float rdy1 = player->dir_y + player->plane_y;
+	float rdx0 = player->dir.x - player->plane.x;
+	float rdx1 = player->dir.x + player->plane.x;
+	float rdy0 = player->dir.y - player->plane.y;
+	float rdy1 = player->dir.y + player->plane.y;
 
 	int p = y - SCREEN_HEIGHT / 2;
 	float z = (float)SCREEN_HEIGHT / 2;
@@ -87,8 +81,8 @@ void screen_render_floor(Screen* screen, Player* player)
 	float step_x = row_dist * (rdx1 - rdx0) / SCREEN_WIDTH;
 	float step_y = row_dist * (rdy1 - rdy0) / SCREEN_WIDTH;
 
-	float floor_x = player->px + row_dist * rdx0;
-	float floor_y = player->py + row_dist * rdy0;
+	float floor_x = player->pos.x + row_dist * rdx0;
+	float floor_y = player->pos.y + row_dist * rdy0;
 
 	for (int x = 0; x < SCREEN_WIDTH; x++) {
 	    int cell_x = (int)floor_x;
@@ -111,6 +105,44 @@ void screen_render_floor(Screen* screen, Player* player)
     }
 }
 
+void screen_perform_dda(int* side, int* map_x, int* map_y, Player* p, 
+			Vec2* ray_dir, Vec2* side_dist, Vec2* delta_dist)
+{
+    int step_x, step_y;
+    int hit = 0;
+
+    if (ray_dir->x < 0) {
+	step_x = -1;
+	side_dist->x = (p->pos.x - *map_x) * delta_dist->x;
+    } else {
+	step_x = 1;
+	side_dist->x = (*map_x + 1.0 - p->pos.x) * delta_dist->x;
+    }
+    if (ray_dir->y < 0) {
+	step_y = -1;
+	side_dist->y = (p->pos.y - *map_y) * delta_dist->y;
+    } else {
+	step_y = 1;
+	side_dist->y = (*map_y + 1.0 - p->pos.y) * delta_dist->y;
+    }
+
+    while (hit == 0) {
+	if (side_dist->x < side_dist->y) {
+	    side_dist->x += delta_dist->x;
+	    *map_x += step_x;
+	    *side = 0;
+	} else {
+	    side_dist->y += delta_dist->y;
+	    *map_y += step_y;
+	    *side = 1;
+	}
+
+	if (screen_map[*map_x][*map_y] > 0) {
+	    hit = 1;
+	}
+    }
+}
+
 // TODO: Function is too long. Seperate into multiple functions
 void screen_render_map(Screen* screen, Player* player)
 {
@@ -118,58 +150,26 @@ void screen_render_map(Screen* screen, Player* player)
 
     for (int x = 0; x < SCREEN_WIDTH; x++) {
 	double camera_x = 2 * x / (double)SCREEN_WIDTH - 1;
-	double ray_dir_x = player->dir_x + player->plane_x * camera_x;
-	double ray_dir_y = player->dir_y + player->plane_y * camera_x;
+	Vec2 ray_dir = {player->dir.x + player->plane.x * camera_x,
+			player->dir.y + player->plane.y * camera_x};
 
-	int map_x = (int)player->px;
-	int map_y = (int)player->py;
+	int map_x = (int)player->pos.x;
+	int map_y = (int)player->pos.y;
 
-	double side_dist_x, side_dist_y;
-	double delta_dist_x = (ray_dir_x == 0) ? 1e30 : fabs(1 / ray_dir_x);
-	double delta_dist_y = (ray_dir_y == 0) ? 1e30 : fabs(1 / ray_dir_y);
+	Vec2 side_dist = {0};
+	Vec2 delta_dist = {(ray_dir.x == 0) ? 1e30 : fabs(1 / ray_dir.x),
+			   (ray_dir.y == 0) ? 1e30 : fabs(1 / ray_dir.y)};
 	double perp_wall_dist;
 
-	int step_x, step_y;
-	int hit = 0;
-	int side;
-
-	if (ray_dir_x < 0) {
-	    step_x = -1;
-	    side_dist_x = (player->px - map_x) * delta_dist_x;
-	} else {
-	    step_x = 1;
-	    side_dist_x = (map_x + 1.0 - player->px) * delta_dist_x;
-	}
-	if (ray_dir_y < 0) {
-	    step_y = -1;
-	    side_dist_y = (player->py - map_y) * delta_dist_y;
-	} else {
-	    step_y = 1;
-	    side_dist_y = (map_y + 1.0 - player->py) * delta_dist_y;
-	}
-
-	while (hit == 0) {
-	    if (side_dist_x < side_dist_y) {
-		side_dist_x += delta_dist_x;
-		map_x += step_x;
-		side = 0;
-	    } else {
-		side_dist_y += delta_dist_y;
-		map_y += step_y;
-		side = 1;
-	    }
-
-	    if (screen_map[map_x][map_y] > 0) {
-		hit = 1;
-	    }
-	}
+	int side = 0;
+	screen_perform_dda(&side, &map_x, &map_y, player, &ray_dir, &side_dist, &delta_dist);
 
 	int tex_num = screen_map[map_x][map_y];
 	
 	if (side == 0)
-	    perp_wall_dist = (side_dist_x - delta_dist_x);
+	    perp_wall_dist = (side_dist.x - delta_dist.x);
 	else
-	    perp_wall_dist = (side_dist_y - delta_dist_y);
+	    perp_wall_dist = (side_dist.y - delta_dist.y);
 
 	int line_height = (int) (SCREEN_HEIGHT / perp_wall_dist);
 
@@ -184,15 +184,15 @@ void screen_render_map(Screen* screen, Player* player)
 	
 	double wall_x;
 	if (side == 0) {
-	    wall_x = player->py + perp_wall_dist * ray_dir_y;
+	    wall_x = player->pos.y + perp_wall_dist * ray_dir.y;
 	} else {
-	    wall_x = player->px + perp_wall_dist * ray_dir_x;
+	    wall_x = player->pos.x + perp_wall_dist * ray_dir.x;
 	}
 	wall_x -= floor((wall_x));
 
 	int tex_x = (int)(wall_x * (double)IMG_WIDTH);
-	if (side == 0 && ray_dir_x > 0) tex_x = IMG_WIDTH - tex_x - 1;
-	if (side == 1 && ray_dir_y < 0) tex_x = IMG_HEIGHT - tex_x - 1;
+	if (side == 0 && ray_dir.x > 0) tex_x = IMG_WIDTH - tex_x - 1;
+	if (side == 1 && ray_dir.y < 0) tex_x = IMG_HEIGHT - tex_x - 1;
 
 	double step = 1.0 * IMG_HEIGHT / line_height;
 	double tex_pos = (draw_start - SCREEN_HEIGHT / 2 + line_height / 2) * step;
@@ -211,8 +211,6 @@ void screen_render_map(Screen* screen, Player* player)
 	    
 	    screen->pixels[y * SCREEN_WIDTH + x] = color;
 	}
-
-	zbuffer[x] = perp_wall_dist;
     }
 }
 

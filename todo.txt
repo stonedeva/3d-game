@@ -2,4 +2,5 @@
 - Items
 - GUI
 - Door
+- Random level generation
 - More performance (higher FPS)
