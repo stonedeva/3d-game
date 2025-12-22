@@ -20,11 +20,11 @@ Screen screen_init(int* pixels)
     screen.pixels = pixels;
     screen.camera_height = SCREEN_WIDTH / 2;
 
-    screen_load_texture(&screen, "./res/ground.png");
     screen_load_texture(&screen, "./res/wall.png");
-    screen_load_texture(&screen, "./res/door.png");
+    screen_load_texture(&screen, "./res/wall_breakable.png");
+    screen_load_texture(&screen, "./res/ground.png");
 
-    sprite_load(&sprite_mgr, "./res/barrel.png", 22, 13);
+    sprite_load(&sprite_mgr, "./res/barrel.png", 22, 15);
 
     return screen;
 }
@@ -69,20 +69,24 @@ void screen_load_texture(Screen* screen, char* file_path)
 void screen_render_floor(Screen* screen, Player* player)
 {
     for (int y = 0; y < SCREEN_HEIGHT; y++) {
-	float rdx0 = player->dir.x - player->plane.x;
-	float rdx1 = player->dir.x + player->plane.x;
-	float rdy0 = player->dir.y - player->plane.y;
-	float rdy1 = player->dir.y + player->plane.y;
+	Vec2 ray_dir0 = {
+	    player->dir.x - player->plane.x,
+	    player->dir.y - player->plane.y
+	};
+	Vec2 ray_dir1 = {
+	    player->dir.x + player->plane.x,
+	    player->dir.y + player->plane.y
+	};
 
 	int p = y - SCREEN_HEIGHT / 2;
 	float z = (float)SCREEN_HEIGHT / 2;
 	float row_dist = z / p;
 
-	float step_x = row_dist * (rdx1 - rdx0) / SCREEN_WIDTH;
-	float step_y = row_dist * (rdy1 - rdy0) / SCREEN_WIDTH;
+	float step_x = row_dist * (ray_dir1.x - ray_dir0.x) / SCREEN_WIDTH;
+	float step_y = row_dist * (ray_dir1.y - ray_dir0.y) / SCREEN_WIDTH;
 
-	float floor_x = player->pos.x + row_dist * rdx0;
-	float floor_y = player->pos.y + row_dist * rdy0;
+	float floor_x = player->pos.x + row_dist * ray_dir0.x;
+	float floor_y = player->pos.y + row_dist * ray_dir0.y;
 
 	for (int x = 0; x < SCREEN_WIDTH; x++) {
 	    int cell_x = (int)floor_x;
@@ -95,7 +99,7 @@ void screen_render_floor(Screen* screen, Player* player)
 	    floor_y += step_y;
 
 	    // Floor
-	    int color = screen->textures[0].pixels[IMG_WIDTH * ty + tx];
+	    int color = screen->textures[2].pixels[IMG_WIDTH * ty + tx];
 	    color = (color >> 1) & 8355711; // More darker
 	    screen->pixels[y * SCREEN_WIDTH + x] = color;
 	
@@ -143,6 +147,7 @@ void screen_perform_dda(int* side, int* map_x, int* map_y, Player* p,
     }
 }
 
+
 // TODO: Function is too long. Seperate into multiple functions
 void screen_render_map(Screen* screen, Player* player)
 {
@@ -164,8 +169,8 @@ void screen_render_map(Screen* screen, Player* player)
 	int side = 0;
 	screen_perform_dda(&side, &map_x, &map_y, player, &ray_dir, &side_dist, &delta_dist);
 
-	int tex_num = screen_map[map_x][map_y];
-	
+	int tex_num = screen_map[map_x][map_y] - 1;
+
 	if (side == 0)
 	    perp_wall_dist = (side_dist.x - delta_dist.x);
 	else
@@ -200,7 +205,6 @@ void screen_render_map(Screen* screen, Player* player)
 	for (int y = draw_start; y < draw_end; y++) {
 	    int tex_y = (int)tex_pos & (IMG_HEIGHT - 1);
 	    tex_pos += step;
-	    //int color = screen->wall_tex.pixels[IMG_HEIGHT * tex_y + tex_x];
 	    int color = screen->textures[tex_num].pixels[IMG_HEIGHT * tex_y + tex_x];
 	    if (side == 1) color = (color >> 1) & 8355711;
 

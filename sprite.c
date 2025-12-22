@@ -18,6 +18,8 @@ void sprite_load(SpriteManager* manager, char* file_path, double x, double y)
     }
 
     GameSprite sprite = {0};
+    sprite.pos = (Vec2) {x, y};
+
     for (int y = 0; y < SPRITE_HEIGHT; y++) {
 	for (int x = 0; x < SPRITE_WIDTH; x++) {
 	    uint8_t* px = p + y * surface->pitch + x * surface->format->BytesPerPixel;

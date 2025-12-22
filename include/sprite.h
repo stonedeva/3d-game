@@ -2,6 +2,7 @@
 #define _SPRITE_H_
 
 #include <stddef.h>
+#include "./vec2.h"
 
 #define SPRITE_WIDTH 32
 #define SPRITE_HEIGHT 32
@@ -9,8 +10,7 @@
 
 typedef struct {
     int pixels[SPRITE_WIDTH * SPRITE_HEIGHT];
-    double x;
-    double y;
+    Vec2 pos;
 } GameSprite;
 
 typedef struct {

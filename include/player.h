@@ -5,6 +5,9 @@
 
 #define PLAYER_SPEED 0.03
 #define PLAYER_ROT_SPEED 0.03
+#define PLAYER_ROT_RIGHT -1
+#define PLAYER_ROT_LEFT 1
+#define PLAYER_ATTACK_RANGE 8
 
 typedef struct {
     Vec2 pos;
@@ -13,13 +16,11 @@ typedef struct {
     Vec2 plane;
 } Player;
 
-/* TODO: Temporary solution to avoid circular includes */
-#include "./screen.h"
 
 Player player_init();
 void player_forward(Player* p);
 void player_backward(Player* p);
-void player_rotate(Player* p, double units);
+void player_rotate(Player* p, int dir);
 void player_handle_input(Player* p);
 
 #endif // _PLAYER_H_
