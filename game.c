@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <errno.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include "./game.h"
@@ -77,7 +78,25 @@ void run_loop(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture)
     }
 }
 
-int main(void)
+void map_load_from_file(char* file_path)
+{
+    FILE* fp = fopen(file_path, "r");
+    if (!fp) {
+	fprintf(stderr, "ERROR: fopen(): Failed to open map file: %s\n",
+		strerror(errno));
+	exit(1);
+    }
+
+    size_t n = fread(screen_map, sizeof(int), MAP_WIDTH*MAP_HEIGHT, fp);
+    if (n != MAP_WIDTH*MAP_HEIGHT) {
+	fprintf(stderr, "ERROR: fread(): Expected %d bytes read %d bytes: %s\n",
+		n, MAP_WIDTH*MAP_HEIGHT, strerror(errno));
+	exit(1);
+    }
+    fclose(fp);
+}
+
+int init()
 {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 	fprintf(stderr, "SDL_Init(): Could not init sdl: %s\n", SDL_GetError());
@@ -89,8 +108,10 @@ int main(void)
 	return 1;
     }
 
-    SDL_Window* window = SDL_CreateWindow("Game", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-						  SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+    SDL_Window* window = SDL_CreateWindow("Game", SDL_WINDOWPOS_UNDEFINED, 
+						  SDL_WINDOWPOS_UNDEFINED,
+						  SCREEN_WIDTH, SCREEN_HEIGHT, 
+						  SDL_WINDOW_SHOWN);
     if (!window) {
 	fprintf(stderr, "SDL_CreateWindow(): Could not create window: %s\n", SDL_GetError());
 	SDL_Quit();
@@ -99,7 +120,8 @@ int main(void)
 
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (!renderer) {
-	fprintf(stderr, "SDL_CreateRenderer(): Could not create renderer: %s\n", SDL_GetError());
+	fprintf(stderr, "SDL_CreateRenderer(): Could not create renderer: %s\n", 
+		SDL_GetError());
 	SDL_DestroyWindow(window);
 	SDL_Quit();
 	return 1;
@@ -130,4 +152,14 @@ int main(void)
     SDL_Quit();
 
     return 0;
+}
+
+int main(int argc, char** argv)
+{
+    if (argc >= 2) {
+	char* map_path = argv[1];
+	map_load_from_file(map_path);
+    }
+
+    return init();
 }
