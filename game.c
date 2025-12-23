@@ -29,7 +29,8 @@ void render(SDL_Renderer* renderer, SDL_Texture* texture)
 {
     switch (game_state) {
     case STATE_MENU:
-	menu_render(renderer);
+    case STATE_PAUSE:
+	menu_render(renderer, game_state);
 	break;
     case STATE_INGAME:
 	screen_render(&screen, &player.dir, &player.plane, &player.pos);
@@ -56,9 +57,12 @@ void run_loop(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture)
 
     while (running) {
 	while (SDL_PollEvent(&ev) != 0) {
-	    if (ev.type == SDL_QUIT || (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_ESCAPE)) {
+	    if (ev.type == SDL_QUIT) {
 		running = 0;
 		return;
+	    }
+	    if (ev.key.keysym.sym == SDLK_ESCAPE && game_state == STATE_INGAME) {
+		game_state = STATE_PAUSE;
 	    }
 	    menu_handle_input(&ev);
 	}

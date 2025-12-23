@@ -11,7 +11,7 @@ int selected = 0;
 char* options[OPT_COUNT] = {
     "Start",
     "Control",
-    "Settings"
+    "Quit"
 };
 
 void menu_render_text(SDL_Renderer* renderer, TTF_Font* font, SDL_Color color, 
@@ -55,15 +55,25 @@ void menu_handle_input(SDL_Event* ev)
 	case SDL_SCANCODE_RETURN:
 	    if (selected == OPT_START) {
 		game_state = STATE_INGAME;
+		break;
+	    }
+	    if (selected == OPT_QUIT) {
+		SDL_Quit();
+		exit(1);
 	    }
 	    break;
 	}
     }
 }
 
-void menu_render(SDL_Renderer* renderer)
+void menu_render(SDL_Renderer* renderer, GameState state)
 {
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    if (state == STATE_PAUSE) {
+	options[0] = "Continue";
+	SDL_SetRenderDrawColor(renderer, 200, 200, 200, 100);
+    } else {
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    }
     SDL_RenderClear(renderer);
 
     TTF_Font* font = TTF_OpenFont("./res/font.ttf", 16);
@@ -73,7 +83,6 @@ void menu_render(SDL_Renderer* renderer)
     }
 
     menu_render_text(renderer, font, white, "The Maze", 15, 20, SCREEN_WIDTH - 20, (int)SCREEN_HEIGHT / 4);
-
     for (int i = 0; i < OPT_COUNT; i++) {
 	SDL_Color col;
 	if (i == selected) {

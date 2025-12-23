@@ -2,16 +2,18 @@
 #define _MENU_H_
 
 #include <SDL2/SDL.h>
+#include <stdbool.h>
+#include "./game.h"
 
 typedef enum {
     OPT_START = 0,
     OPT_CONTROL,
-    OPT_SETTINGS,
+    OPT_QUIT,
     OPT_COUNT
 } Options;
 
 
-void menu_render(SDL_Renderer* renderer);
+void menu_render(SDL_Renderer* renderer, GameState state);
 void menu_handle_input(SDL_Event* ev);
 
 #endif // _MENU_H_
