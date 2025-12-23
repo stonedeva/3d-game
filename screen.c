@@ -11,6 +11,35 @@
 #include <assert.h>
 #include <math.h>
 
+int screen_map[MAP_WIDTH][MAP_HEIGHT] = {
+  {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,1,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,1,0,0,0,0,0,1,1,0,0,0,0,1,1,1,0,0,0,1},
+  {1,0,0,0,0,1,0,0,0,0,0,1,0,1,0,1,1,0,0,1,1,0,0,1},
+  {1,0,0,0,1,0,0,0,0,0,0,2,0,0,1,0,0,0,0,0,1,0,0,1},
+  {1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,1,1,0,0,1,0,0,1},
+  {1,0,0,0,0,1,1,0,1,1,1,0,1,0,0,1,0,1,0,0,1,0,0,1},
+  {1,0,0,0,0,0,1,0,1,0,0,0,0,1,0,1,0,0,0,0,1,0,0,1},
+  {1,0,0,0,0,0,1,0,1,1,1,1,1,1,1,1,0,1,1,1,1,0,0,1},
+  {1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1},
+  {1,0,0,0,0,0,1,1,1,1,1,0,0,1,1,1,1,1,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,1,2,0,1,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,1},
+  {1,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,1},
+  {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
+};
+
+
+
 
 SpriteManager sprite_mgr = {0};
 
@@ -109,34 +138,33 @@ void screen_render_floor(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
     }
 }
 
-void screen_perform_dda(int* side, int* map_x, int* map_y, Vec2* pos, 
-			Vec2* ray_dir, Vec2* side_dist, Vec2* delta_dist)
+void screen_perform_dda(Ray* ray, int* side, int* map_x, int* map_y, Vec2* pos)
 {
     int step_x, step_y;
     int hit = 0;
 
-    if (ray_dir->x < 0) {
+    if (ray->dir.x < 0) {
 	step_x = -1;
-	side_dist->x = (pos->x - *map_x) * delta_dist->x;
+	ray->side_dist.x = (pos->x - *map_x) * ray->delta_dist.x;
     } else {
 	step_x = 1;
-	side_dist->x = (*map_x + 1.0 - pos->x) * delta_dist->x;
+	ray->side_dist.x = (*map_x + 1.0 - pos->x) * ray->delta_dist.x;
     }
-    if (ray_dir->y < 0) {
+    if (ray->dir.y < 0) {
 	step_y = -1;
-	side_dist->y = (pos->y - *map_y) * delta_dist->y;
+	ray->side_dist.y = (pos->y - *map_y) * ray->delta_dist.y;
     } else {
 	step_y = 1;
-	side_dist->y = (*map_y + 1.0 - pos->y) * delta_dist->y;
+	ray->side_dist.y = (*map_y + 1.0 - pos->y) * ray->delta_dist.y;
     }
 
     while (hit == 0) {
-	if (side_dist->x < side_dist->y) {
-	    side_dist->x += delta_dist->x;
+	if (ray->side_dist.x < ray->side_dist.y) {
+	    ray->side_dist.x += ray->delta_dist.x;
 	    *map_x += step_x;
 	    *side = 0;
 	} else {
-	    side_dist->y += delta_dist->y;
+	    ray->side_dist.y += ray->delta_dist.y;
 	    *map_y += step_y;
 	    *side = 1;
 	}
@@ -152,26 +180,29 @@ void screen_render_walls(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
 {
     for (int x = 0; x < SCREEN_WIDTH; x++) {
 	double camera_x = 2 * x / (double)SCREEN_WIDTH - 1;
-	Vec2 ray_dir = {dir->x + plane->x * camera_x,
-			dir->y + plane->y * camera_x};
-
 	int map_x = (int)pos->x;
 	int map_y = (int)pos->y;
 
+	Vec2 ray_dir = {dir->x + plane->x * camera_x,
+			dir->y + plane->y * camera_x};
 	Vec2 side_dist = {0};
 	Vec2 delta_dist = {(ray_dir.x == 0) ? 1e30 : fabs(1 / ray_dir.x),
 			   (ray_dir.y == 0) ? 1e30 : fabs(1 / ray_dir.y)};
+	Ray ray = {
+	    ray_dir, side_dist, delta_dist
+	};
+
 	double perp_wall_dist;
 
 	int side = 0;
-	screen_perform_dda(&side, &map_x, &map_y, pos, &ray_dir, &side_dist, &delta_dist);
+	screen_perform_dda(&ray, &side, &map_x, &map_y, pos);
 
 	int tex_num = screen_map[map_x][map_y] - 1;
 
 	if (side == 0)
-	    perp_wall_dist = (side_dist.x - delta_dist.x);
+	    perp_wall_dist = (ray.side_dist.x - ray.delta_dist.x);
 	else
-	    perp_wall_dist = (side_dist.y - delta_dist.y);
+	    perp_wall_dist = (ray.side_dist.y - ray.delta_dist.y);
 
 	int line_height = (int) (SCREEN_HEIGHT / perp_wall_dist);
 
@@ -186,9 +217,9 @@ void screen_render_walls(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
 	
 	double wall_x;
 	if (side == 0) {
-	    wall_x = pos->y + perp_wall_dist * ray_dir.y;
+	    wall_x = pos->y + perp_wall_dist * ray.dir.y;
 	} else {
-	    wall_x = pos->x + perp_wall_dist * ray_dir.x;
+	    wall_x = pos->x + perp_wall_dist * ray.dir.x;
 	}
 	wall_x -= floor((wall_x));
 

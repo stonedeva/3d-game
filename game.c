@@ -68,7 +68,6 @@ void run_loop(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture)
 
 	if (SDL_GetTicks() - timer >= 1000) {
 	    printf("FPS: %d, Ticks: %d\n", frames, tick_count);
-	    printf("px: %f, py: %f\n", player.pos.x, player.pos.y);
 	    frames = 0;
 	    tick_count = 0;
 	    timer += 1000;
@@ -96,7 +95,7 @@ void map_load_from_file(char* file_path)
     fclose(fp);
 }
 
-int init()
+int init(void)
 {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 	fprintf(stderr, "SDL_Init(): Could not init sdl: %s\n", SDL_GetError());
