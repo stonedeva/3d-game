@@ -3,9 +3,12 @@
 #include <errno.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 #include "./game.h"
+#include "./map.h"
 #include "./player.h"
 #include "./screen.h"
+#include "./menu.h"
 
 int tick_count = 0;
 int pixels[SCREEN_WIDTH * SCREEN_HEIGHT];
@@ -13,6 +16,7 @@ int pixels[SCREEN_WIDTH * SCREEN_HEIGHT];
 // Forward declaration
 Player player;
 Screen screen;
+GameState game_state = STATE_MENU;
 
 
 void update(void)
@@ -23,11 +27,17 @@ void update(void)
 
 void render(SDL_Renderer* renderer, SDL_Texture* texture)
 {
-    screen_render(&screen, &player.dir, &player.plane, &player.pos);
-
-    SDL_UpdateTexture(texture, 0, pixels, SCREEN_WIDTH * sizeof(int));
-    SDL_RenderClear(renderer);
-    SDL_RenderCopy(renderer, texture, 0, 0);
+    switch (game_state) {
+    case STATE_MENU:
+	menu_render(renderer);
+	break;
+    case STATE_INGAME:
+	screen_render(&screen, &player.dir, &player.plane, &player.pos);
+	SDL_UpdateTexture(texture, 0, pixels, SCREEN_WIDTH * sizeof(int));
+	SDL_RenderClear(renderer);
+	SDL_RenderCopy(renderer, texture, 0, 0);
+	break;
+    }
     SDL_RenderPresent(renderer);
 }
 
@@ -50,7 +60,7 @@ void run_loop(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture)
 		running = 0;
 		return;
 	    }
-
+	    menu_handle_input(&ev);
 	}
 
 	uint64_t now = SDL_GetPerformanceCounter();
@@ -86,12 +96,13 @@ void map_load_from_file(char* file_path)
 	exit(1);
     }
 
-    size_t n = fread(screen_map, sizeof(int), MAP_WIDTH*MAP_HEIGHT, fp);
+    size_t n = fread(map, 1, MAP_WIDTH*MAP_HEIGHT, fp);
     if (n != MAP_WIDTH*MAP_HEIGHT) {
-	fprintf(stderr, "ERROR: fread(): Expected %d bytes read %d bytes: %s\n",
-		n, MAP_WIDTH*MAP_HEIGHT, strerror(errno));
+	fprintf(stderr, "ERROR: fread(): Expected %d bytes read %zu bytes: %s\n",
+		MAP_WIDTH*MAP_HEIGHT, n, strerror(errno));
 	exit(1);
     }
+
     fclose(fp);
 }
 
@@ -101,9 +112,12 @@ int init(void)
 	fprintf(stderr, "SDL_Init(): Could not init sdl: %s\n", SDL_GetError());
 	return 1;
     }
-
     if (!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG)) {
 	fprintf(stderr, "IMG_Init(): Could not init image: %s\n", IMG_GetError());
+	return 1;
+    }
+    if (TTF_Init() < 0) {
+	fprintf(stderr, "TTF_Init(): Could not init ttf: %s\n", TTF_GetError());
 	return 1;
     }
 

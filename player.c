@@ -1,5 +1,5 @@
 #include "./player.h"
-#include "./screen.h"
+#include "./map.h"
 #include "./game.h"
 #include <stdbool.h>
 #include <SDL2/SDL.h>
@@ -17,17 +17,17 @@ Player player_init()
 
 void player_forward(Player* p)
 {
-    if (screen_map[(int)(p->pos.x + p->dir.x * PLAYER_SPEED)][(int)p->pos.y] == 0) 
+    if (map[(int)(p->pos.x + p->dir.x * PLAYER_SPEED)][(int)p->pos.y] == 0) 
 	p->pos.x += p->dir.x * PLAYER_SPEED;
-    if (screen_map[(int)p->pos.x][(int)(p->pos.y + p->dir.y * PLAYER_SPEED)] == 0) 
+    if (map[(int)p->pos.x][(int)(p->pos.y + p->dir.y * PLAYER_SPEED)] == 0) 
 	p->pos.y += p->dir.y * PLAYER_SPEED;
 }
 
 void player_backward(Player* p)
 {
-    if (screen_map[(int)(p->pos.x - p->dir.x * PLAYER_SPEED)][(int)p->pos.y] == 0) 
+    if (map[(int)(p->pos.x - p->dir.x * PLAYER_SPEED)][(int)p->pos.y] == 0) 
 	p->pos.x -= p->dir.x * PLAYER_SPEED;
-    if (screen_map[(int)p->pos.x][(int)(p->pos.y - p->dir.y * PLAYER_SPEED)] == 0) 
+    if (map[(int)p->pos.x][(int)(p->pos.y - p->dir.y * PLAYER_SPEED)] == 0) 
 	p->pos.y -= p->dir.y * PLAYER_SPEED;
 }
 
@@ -53,8 +53,8 @@ void player_break_block(Player* p)
     float dist = sqrtf(pow(p->pos.x - map_x, 2) + pow(p->pos.y - map_y, 2));
 
     if (dist <= PLAYER_ATTACK_RANGE) {
-	if (screen_map[map_x][map_y] == 2) {
-	    screen_map[map_x][map_y] = 0;
+	if (map[map_x][map_y] == TILE_BREAKABLE_STONE) {
+	    map[map_x][map_y] = 0;
 	}
     }
 }

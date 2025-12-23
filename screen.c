@@ -1,4 +1,5 @@
 #include "./screen.h"
+#include "./map.h"
 #include "./player.h"
 #include "./game.h"
 #include "./sprite.h"
@@ -11,37 +12,8 @@
 #include <assert.h>
 #include <math.h>
 
-int screen_map[MAP_WIDTH][MAP_HEIGHT] = {
-  {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,1,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,1,0,0,0,0,0,1,1,0,0,0,0,1,1,1,0,0,0,1},
-  {1,0,0,0,0,1,0,0,0,0,0,1,0,1,0,1,1,0,0,1,1,0,0,1},
-  {1,0,0,0,1,0,0,0,0,0,0,2,0,0,1,0,0,0,0,0,1,0,0,1},
-  {1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,1,1,0,0,1,0,0,1},
-  {1,0,0,0,0,1,1,0,1,1,1,0,1,0,0,1,0,1,0,0,1,0,0,1},
-  {1,0,0,0,0,0,1,0,1,0,0,0,0,1,0,1,0,0,0,0,1,0,0,1},
-  {1,0,0,0,0,0,1,0,1,1,1,1,1,1,1,1,0,1,1,1,1,0,0,1},
-  {1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1},
-  {1,0,0,0,0,0,1,1,1,1,1,0,0,1,1,1,1,1,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,1,2,0,1,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,1},
-  {1,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,1},
-  {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
-};
-
-
-
-
 SpriteManager sprite_mgr = {0};
+
 
 Screen screen_init(int* pixels)
 {
@@ -49,7 +21,8 @@ Screen screen_init(int* pixels)
     screen.pixels = pixels;
     screen.camera_height = SCREEN_WIDTH / 2;
 
-    screen_load_texture(&screen, "./res/wall.png");
+    screen_load_texture(&screen, "./res/wall0.png");
+    screen_load_texture(&screen, "./res/wall1.png");
     screen_load_texture(&screen, "./res/wall_breakable.png");
     screen_load_texture(&screen, "./res/ground.png");
 
@@ -128,7 +101,7 @@ void screen_render_floor(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
 	    floor_y += step_y;
 
 	    // Floor
-	    int color = screen->textures[2].pixels[IMG_WIDTH * ty + tx];
+	    int color = screen->textures[3].pixels[IMG_WIDTH * ty + tx];
 	    color = (color >> 1) & 8355711; // More darker
 	    screen->pixels[y * SCREEN_WIDTH + x] = color;
 	
@@ -169,7 +142,7 @@ void screen_perform_dda(Ray* ray, int* side, int* map_x, int* map_y, Vec2* pos)
 	    *side = 1;
 	}
 
-	if (screen_map[*map_x][*map_y] > 0) {
+	if (map[*map_x][*map_y] > 0) {
 	    hit = 1;
 	}
     }
@@ -197,7 +170,7 @@ void screen_render_walls(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
 	int side = 0;
 	screen_perform_dda(&ray, &side, &map_x, &map_y, pos);
 
-	int tex_num = screen_map[map_x][map_y] - 1;
+	int tex_num = map[map_x][map_y] - 1;
 
 	if (side == 0)
 	    perp_wall_dist = (ray.side_dist.x - ray.delta_dist.x);
@@ -235,12 +208,7 @@ void screen_render_walls(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
 	    tex_pos += step;
 	    int color = screen->textures[tex_num].pixels[IMG_HEIGHT * tex_y + tex_x];
 	    if (side == 1) color = (color >> 1) & 8355711;
-
-	    if (color == 0x00FFFFFF) {
-		printf("invisible color\n");
-		continue;
-	    }
-	    
+    
 	    screen->pixels[y * SCREEN_WIDTH + x] = color;
 	}
     }

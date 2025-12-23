@@ -5,8 +5,6 @@
 #include <stdlib.h>
 #include "./vec2.h"
 
-#define MAP_WIDTH 24
-#define MAP_HEIGHT 24
 #define IMG_WIDTH 16
 #define IMG_HEIGHT 16
 #define FOV 60
@@ -33,8 +31,6 @@ typedef struct {
     Vec2 side_dist;
     Vec2 delta_dist;
 } Ray;
-
-extern int screen_map[MAP_WIDTH][MAP_HEIGHT];
 
 
 Screen screen_init(int* pixels);

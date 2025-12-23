@@ -13,7 +13,7 @@
 #define WINDOW_HEIGHT (MAP_HEIGHT*TILE_SIZE)
 
 bool is_saved = 0;
-int map[MAP_WIDTH][MAP_HEIGHT];
+unsigned char map[MAP_WIDTH][MAP_HEIGHT] = {0};
 
 
 void draw_map()
@@ -44,7 +44,7 @@ void save_map(char* out_path)
 	exit(1);
     }
 
-    size_t n = fwrite(map, sizeof(int), MAP_WIDTH*MAP_HEIGHT, fp);
+    size_t n = fwrite(map, 1, MAP_WIDTH*MAP_HEIGHT, fp);
     if (n != MAP_WIDTH*MAP_HEIGHT) {
 	fprintf(stderr, "ERROR: fwrite(): Expected %d bytes written but got %d bytes: %s\n",
 		n, MAP_WIDTH*MAP_HEIGHT, strerror(errno));
