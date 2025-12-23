@@ -66,16 +66,16 @@ void screen_load_texture(Screen* screen, char* file_path)
 }
 
 
-void screen_render_floor(Screen* screen, Player* player)
+void screen_render_floor(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
 {
     for (int y = 0; y < SCREEN_HEIGHT; y++) {
 	Vec2 ray_dir0 = {
-	    player->dir.x - player->plane.x,
-	    player->dir.y - player->plane.y
+	    dir->x - plane->x,
+	    dir->y - plane->y
 	};
 	Vec2 ray_dir1 = {
-	    player->dir.x + player->plane.x,
-	    player->dir.y + player->plane.y
+	    dir->x + plane->x,
+	    dir->y + plane->y
 	};
 
 	int p = y - SCREEN_HEIGHT / 2;
@@ -85,8 +85,8 @@ void screen_render_floor(Screen* screen, Player* player)
 	float step_x = row_dist * (ray_dir1.x - ray_dir0.x) / SCREEN_WIDTH;
 	float step_y = row_dist * (ray_dir1.y - ray_dir0.y) / SCREEN_WIDTH;
 
-	float floor_x = player->pos.x + row_dist * ray_dir0.x;
-	float floor_y = player->pos.y + row_dist * ray_dir0.y;
+	float floor_x = pos->x + row_dist * ray_dir0.x;
+	float floor_y = pos->y + row_dist * ray_dir0.y;
 
 	for (int x = 0; x < SCREEN_WIDTH; x++) {
 	    int cell_x = (int)floor_x;
@@ -109,7 +109,7 @@ void screen_render_floor(Screen* screen, Player* player)
     }
 }
 
-void screen_perform_dda(int* side, int* map_x, int* map_y, Player* p, 
+void screen_perform_dda(int* side, int* map_x, int* map_y, Vec2* pos, 
 			Vec2* ray_dir, Vec2* side_dist, Vec2* delta_dist)
 {
     int step_x, step_y;
@@ -117,17 +117,17 @@ void screen_perform_dda(int* side, int* map_x, int* map_y, Player* p,
 
     if (ray_dir->x < 0) {
 	step_x = -1;
-	side_dist->x = (p->pos.x - *map_x) * delta_dist->x;
+	side_dist->x = (pos->x - *map_x) * delta_dist->x;
     } else {
 	step_x = 1;
-	side_dist->x = (*map_x + 1.0 - p->pos.x) * delta_dist->x;
+	side_dist->x = (*map_x + 1.0 - pos->x) * delta_dist->x;
     }
     if (ray_dir->y < 0) {
 	step_y = -1;
-	side_dist->y = (p->pos.y - *map_y) * delta_dist->y;
+	side_dist->y = (pos->y - *map_y) * delta_dist->y;
     } else {
 	step_y = 1;
-	side_dist->y = (*map_y + 1.0 - p->pos.y) * delta_dist->y;
+	side_dist->y = (*map_y + 1.0 - pos->y) * delta_dist->y;
     }
 
     while (hit == 0) {
@@ -147,19 +147,16 @@ void screen_perform_dda(int* side, int* map_x, int* map_y, Player* p,
     }
 }
 
-
 // TODO: Function is too long. Seperate into multiple functions
-void screen_render_map(Screen* screen, Player* player)
+void screen_render_walls(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
 {
-    screen_render_floor(screen, player);
-
     for (int x = 0; x < SCREEN_WIDTH; x++) {
 	double camera_x = 2 * x / (double)SCREEN_WIDTH - 1;
-	Vec2 ray_dir = {player->dir.x + player->plane.x * camera_x,
-			player->dir.y + player->plane.y * camera_x};
+	Vec2 ray_dir = {dir->x + plane->x * camera_x,
+			dir->y + plane->y * camera_x};
 
-	int map_x = (int)player->pos.x;
-	int map_y = (int)player->pos.y;
+	int map_x = (int)pos->x;
+	int map_y = (int)pos->y;
 
 	Vec2 side_dist = {0};
 	Vec2 delta_dist = {(ray_dir.x == 0) ? 1e30 : fabs(1 / ray_dir.x),
@@ -167,7 +164,7 @@ void screen_render_map(Screen* screen, Player* player)
 	double perp_wall_dist;
 
 	int side = 0;
-	screen_perform_dda(&side, &map_x, &map_y, player, &ray_dir, &side_dist, &delta_dist);
+	screen_perform_dda(&side, &map_x, &map_y, pos, &ray_dir, &side_dist, &delta_dist);
 
 	int tex_num = screen_map[map_x][map_y] - 1;
 
@@ -189,9 +186,9 @@ void screen_render_map(Screen* screen, Player* player)
 	
 	double wall_x;
 	if (side == 0) {
-	    wall_x = player->pos.y + perp_wall_dist * ray_dir.y;
+	    wall_x = pos->y + perp_wall_dist * ray_dir.y;
 	} else {
-	    wall_x = player->pos.x + perp_wall_dist * ray_dir.x;
+	    wall_x = pos->x + perp_wall_dist * ray_dir.x;
 	}
 	wall_x -= floor((wall_x));
 
@@ -218,8 +215,9 @@ void screen_render_map(Screen* screen, Player* player)
     }
 }
 
-void screen_redraw(Screen* screen)
+void screen_render(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
 {
-    memset(screen->pixels, 0, SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(int));
+    screen_render_floor(screen, dir, plane, pos);
+    screen_render_walls(screen, dir, plane, pos);
 }
 

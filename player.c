@@ -11,6 +11,7 @@ Player player_init()
     p.pa = 1.5;
     p.dir = (Vec2) {-1, 0};
     p.plane = (Vec2) {0, 0.66};
+
     return p;
 }
 
