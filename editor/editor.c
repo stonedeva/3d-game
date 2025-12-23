@@ -37,7 +37,7 @@ void draw_map()
 
 void save_map(char* out_path)
 {
-    FILE* fp = fopen(out_path, "w");
+    FILE* fp = fopen(out_path, "wb");
     if (!fp) {
 	fprintf(stderr, "ERROR: fopen(): Failed to open output file: %s\n",
 		strerror(errno));

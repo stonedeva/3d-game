@@ -80,7 +80,7 @@ void run_loop(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture)
 
 void map_load_from_file(char* file_path)
 {
-    FILE* fp = fopen(file_path, "r");
+    FILE* fp = fopen(file_path, "rb");
     if (!fp) {
 	fprintf(stderr, "ERROR: fopen(): Failed to open map file: %s\n",
 		strerror(errno));
