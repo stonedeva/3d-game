@@ -4,26 +4,13 @@
 #include <math.h>
 #include <stdlib.h>
 #include "./vec2.h"
+#include "./bitmap.h"
 
-#define IMG_WIDTH 16
-#define IMG_HEIGHT 16
 #define FOV 60
-#define TEXTURE_CAP 10
-#define INVISIBLE_COLOR 
-
-typedef struct {
-    char* file_path;
-    int pixels[IMG_WIDTH * IMG_HEIGHT];
-} GameImage;
 
 typedef struct {
     int* pixels;
-    // first element is celling/floor texture
-    GameImage textures[TEXTURE_CAP];
-    size_t texture_count;
-    GameImage wall_tex;
-    GameImage ground_tex;
-    GameImage door_tex;
+    Bitmap bitmap;
 } Screen;
 
 typedef struct {

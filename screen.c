@@ -20,55 +20,12 @@ Screen screen_init(int* pixels)
     Screen screen = {0};
     screen.pixels = pixels;
 
-    screen_load_texture(&screen, "./res/wall0.png");
-    screen_load_texture(&screen, "./res/wall1.png");
-    screen_load_texture(&screen, "./res/wall1_breakable0.png");
-    screen_load_texture(&screen, "./res/wall1_breakable1.png");
-    screen_load_texture(&screen, "./res/wall1_breakable2.png");
-    screen_load_texture(&screen, "./res/wall1_breakable3.png");
-    screen_load_texture(&screen, "./res/wall1_breakable4.png");
-    screen_load_texture(&screen, "./res/gate.png");
-    screen_load_texture(&screen, "./res/ground.png");
+    screen.bitmap = bitmap_load("./res/bitmap.png");
 
-    sprite_load(&sprite_mgr, "./res/barrel.png", 22, 15);
+    //sprite_load(&sprite_mgr, "./res/barrel.png", 22, 15);
 
     return screen;
 }
-
-void screen_load_texture(Screen* screen, char* file_path)
-{
-    SDL_Surface* surface = IMG_Load(file_path);
-    if (!surface) {
-	fprintf(stderr, "screen_load_texture(): Could not read image file\n");
-	exit(1);
-    }
-    uint8_t* p = (uint8_t*)surface->pixels;
-
-    /* 8 bit for r,g,b (0-255 each) */
-    if (surface->format->BitsPerPixel != 24) {
-	fprintf(stderr, "BitsPerPixel != 24: Could not read image file\n");
-	SDL_FreeSurface(surface);
-	exit(1);
-    }
-
-    GameImage img = {0};
-    for (int y = 0; y < IMG_HEIGHT; y++) {
-	for (int x = 0; x < IMG_WIDTH; x++) {
-	    uint8_t* px = p + y * surface->pitch + x * surface->format->BytesPerPixel;
-	    uint8_t r, g, b;
-	    SDL_GetRGB(*(int*)px, surface->format, &r, &g, &b);
-	    img.pixels[y * IMG_WIDTH + x] = (0xFF << 24) | (r << 16) | (g << 8) | b;
-	}
-    }
-    SDL_FreeSurface(surface);
-
-    if (screen->texture_count >= TEXTURE_CAP) {
-	fprintf(stderr, "TEXTURE_CAP has been reached!\n");
-	exit(1);
-    }
-    screen->textures[screen->texture_count++] = img;
-}
-
 
 void screen_render_floor(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
 {
@@ -96,14 +53,14 @@ void screen_render_floor(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
 	    int cell_x = (int)floor_x;
 	    int cell_y = (int)floor_y;
 
-	    int tx = (int)(IMG_WIDTH * (floor_x - cell_x)) & 15;
-	    int ty = (int)(IMG_HEIGHT * (floor_y - cell_y)) & 15;
+	    int tx = (int)(TEX_WIDTH * (floor_x - cell_x)) & 15;
+	    int ty = (int)(TEX_HEIGHT * (floor_y - cell_y)) & 15;
 
 	    floor_x += step_x;
 	    floor_y += step_y;
 
 	    // Floor
-	    int color = screen->textures[8].pixels[IMG_WIDTH * ty + tx];
+	    int color = screen->bitmap.pixels[TEX_WIDTH * ty + tx][0];
 	    color = (color >> 1) & 8355711; // More darker
 	    screen->pixels[y * SCREEN_WIDTH + x] = color;
 	
@@ -117,7 +74,6 @@ void screen_perform_dda(Ray* ray, int* map_x, int* map_y, Vec2* pos)
 {
     int step_x, step_y;
     int hit = 0;
-    bool is_invisible = 0;
 
     if (ray->dir.x < 0) {
 	step_x = -1;
@@ -145,8 +101,7 @@ void screen_perform_dda(Ray* ray, int* map_x, int* map_y, Vec2* pos)
 	    ray->side = 1;
 	}
 
-	Tile tile = map[*map_x][*map_y];
-	if (tile > 0) {
+	if (map[*map_x][*map_y] > 0) {
 	    hit = 1;
 	}
     }
@@ -189,10 +144,10 @@ void screen_render_walls(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
 	double wall_x = 0;
 	screen_calculate_perp_wall_dist(&ray, pos, &wall_x);
 
-	int tex_num = map[map_x][map_y] - 1;
-	int tex_x = (int)(wall_x * (double)IMG_WIDTH);
-	if (ray.side == 0 && ray_dir.x > 0) tex_x = IMG_WIDTH - tex_x - 1;
-	if (ray.side == 1 && ray_dir.y < 0) tex_x = IMG_HEIGHT - tex_x - 1;
+	int tex_num = map[map_x][map_y];
+	int tex_x = (int)(wall_x * (double)TEX_WIDTH);
+	if (ray.side == 0 && ray_dir.x > 0) tex_x = TEX_WIDTH - tex_x - 1;
+	if (ray.side == 1 && ray_dir.y < 0) tex_x = TEX_HEIGHT - tex_x - 1;
 
 	int line_height = (int) (SCREEN_HEIGHT / ray.perp_wall_dist);
 	int draw_start = -line_height / 2 + SCREEN_HEIGHT / 2;
@@ -204,13 +159,13 @@ void screen_render_walls(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
 	    draw_end = SCREEN_HEIGHT - 1;
 	}
 
-	double step = 1.0 * IMG_HEIGHT / line_height;
+	double step = 1.0 * TEX_HEIGHT / line_height;
 	double tex_pos = (draw_start - SCREEN_HEIGHT / 2 + line_height / 2) * step;
 
 	for (int y = draw_start; y < draw_end; y++) {
-	    int tex_y = (int)tex_pos & (IMG_HEIGHT - 1);
+	    int tex_y = (int)tex_pos & (TEX_HEIGHT - 1);
 	    tex_pos += step;
-	    int color = screen->textures[tex_num].pixels[IMG_HEIGHT * tex_y + tex_x];
+	    int color = screen->bitmap.pixels[TEX_HEIGHT * tex_y + tex_x][tex_num];
 	    if (ray.side == 1) {
 		color = (color >> 1) & 8355711;
 	    }

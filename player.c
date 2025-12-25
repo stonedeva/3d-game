@@ -46,27 +46,17 @@ void player_rotate(Player* p, int dir)
     };
 }
 
-void player_break_block(Player* p)
+void player_interact_block(Player* p, int map_x, int map_y)
 {
-    int map_x = (int)(p->pos.x + p->dir.x);
-    int map_y = (int)(p->pos.y + p->dir.y);
-    float dist = sqrtf(pow(p->pos.x - map_x, 2) + pow(p->pos.y - map_y, 2));
-
-    if (dist <= PLAYER_ATTACK_RANGE) {
-	Tile tile = map[map_x][map_y];
-	switch (tile) {
-	case TILE_LIGHT_BREAKSTONE0:
-	case TILE_LIGHT_BREAKSTONE1:
-	case TILE_LIGHT_BREAKSTONE2:
-	case TILE_LIGHT_BREAKSTONE3:
-	case TILE_LIGHT_BREAKSTONE4:
-	    if (tile != TILE_LIGHT_BREAKSTONE4) {
-		map[map_x][map_y] = tile + 1;
-	    } else {
-		map[map_x][map_y] = TILE_EMPTY;
-	    }
-	    break;
-	}
+    Tile tile = map[map_x][map_y];
+    switch (tile) {
+    case TILE_LIGHT_BREAKSTONE0:
+    case TILE_LIGHT_BREAKSTONE1:
+    case TILE_LIGHT_BREAKSTONE2:
+    case TILE_LIGHT_BREAKSTONE3:
+    case TILE_LIGHT_BREAKSTONE4:
+	map_break_block(map_x, map_y, TILE_LIGHT_BREAKSTONE4);
+	break;
     }
 }
 
@@ -86,10 +76,17 @@ void player_handle_input(Player* p)
     if (state[SDL_SCANCODE_LEFT]) {
 	player_rotate(p, PLAYER_ROT_LEFT);
     }
+
     uint8_t current_space = state[SDL_SCANCODE_SPACE];
     static uint8_t prev_space = 0;
     if (prev_space && !current_space) {
-	player_break_block(p);
+	int map_x = (int)(p->pos.x + p->dir.x);
+	int map_y = (int)(p->pos.y + p->dir.y);
+	float dist = sqrtf(pow(p->pos.x - map_x, 2) + pow(p->pos.y - map_y, 2));
+
+	if (dist <= PLAYER_ATTACK_RANGE) {
+	   player_interact_block(p, map_x, map_y);
+	}
     }
     prev_space = current_space;
 }
