@@ -8,7 +8,8 @@
 #define IMG_WIDTH 16
 #define IMG_HEIGHT 16
 #define FOV 60
-#define TEXTURE_CAP 5
+#define TEXTURE_CAP 10
+#define INVISIBLE_COLOR 
 
 typedef struct {
     char* file_path;
@@ -17,7 +18,6 @@ typedef struct {
 
 typedef struct {
     int* pixels;
-    double camera_height;
     // first element is celling/floor texture
     GameImage textures[TEXTURE_CAP];
     size_t texture_count;
@@ -30,6 +30,8 @@ typedef struct {
     Vec2 dir;
     Vec2 side_dist;
     Vec2 delta_dist;
+    double perp_wall_dist;
+    int side;
 } Ray;
 
 

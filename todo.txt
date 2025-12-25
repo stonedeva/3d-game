@@ -1,3 +1,6 @@
+- Gates
+- More types of blocks (special/interactable blocks)
+- Sounds
 - Sprites
 - Items
 - GUI

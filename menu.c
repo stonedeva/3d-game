@@ -70,7 +70,15 @@ void menu_render(SDL_Renderer* renderer, GameState state)
 {
     if (state == STATE_PAUSE) {
 	options[0] = "Continue";
-	SDL_SetRenderDrawColor(renderer, 200, 200, 200, 100);
+	SDL_Texture* transparent_back = SDL_CreateTexture(
+	    renderer,
+	    SDL_PIXELFORMAT_RGBA8888,
+	    SDL_TEXTUREACCESS_TARGET,
+	    SCREEN_WIDTH,
+	    SCREEN_HEIGHT
+	);
+	SDL_SetTextureBlendMode(transparent_back, SDL_BLENDMODE_BLEND);
+	SDL_SetRenderDrawColor(renderer, 128, 128, 128, 128);
     } else {
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     }

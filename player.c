@@ -53,8 +53,19 @@ void player_break_block(Player* p)
     float dist = sqrtf(pow(p->pos.x - map_x, 2) + pow(p->pos.y - map_y, 2));
 
     if (dist <= PLAYER_ATTACK_RANGE) {
-	if (map[map_x][map_y] == TILE_BREAKABLE_STONE) {
-	    map[map_x][map_y] = 0;
+	Tile tile = map[map_x][map_y];
+	switch (tile) {
+	case TILE_LIGHT_BREAKSTONE0:
+	case TILE_LIGHT_BREAKSTONE1:
+	case TILE_LIGHT_BREAKSTONE2:
+	case TILE_LIGHT_BREAKSTONE3:
+	case TILE_LIGHT_BREAKSTONE4:
+	    if (tile != TILE_LIGHT_BREAKSTONE4) {
+		map[map_x][map_y] = tile + 1;
+	    } else {
+		map[map_x][map_y] = TILE_EMPTY;
+	    }
+	    break;
 	}
     }
 }
@@ -75,7 +86,10 @@ void player_handle_input(Player* p)
     if (state[SDL_SCANCODE_LEFT]) {
 	player_rotate(p, PLAYER_ROT_LEFT);
     }
-    if (state[SDL_SCANCODE_SPACE]) {
+    uint8_t current_space = state[SDL_SCANCODE_SPACE];
+    static uint8_t prev_space = 0;
+    if (prev_space && !current_space) {
 	player_break_block(p);
     }
+    prev_space = current_space;
 }
