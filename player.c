@@ -57,6 +57,9 @@ void player_interact_block(Player* p, int map_x, int map_y)
     case TILE_LIGHT_BREAKSTONE4:
 	map_break_block(map_x, map_y, TILE_LIGHT_BREAKSTONE4);
 	break;
+    case TILE_TNT:
+	map_explode_block(map_x, map_y);
+	break;
     }
 }
 

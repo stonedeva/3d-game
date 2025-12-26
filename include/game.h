@@ -9,8 +9,8 @@ typedef enum {
 
 extern GameState game_state;
 
-#define SCREEN_WIDTH 640
-#define SCREEN_HEIGHT 450
+#define SCREEN_WIDTH 600
+#define SCREEN_HEIGHT 400
 #define TARGET_FPS 60
 
 #endif // _GAME_H_

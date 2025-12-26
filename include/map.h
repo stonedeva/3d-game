@@ -15,12 +15,12 @@ typedef enum {
     TILE_LIGHT_BREAKSTONE4,
     TILE_GATE,
     TILE_TNT,
-    TILE_LIGHT_TNT
 } Tile;
 
 extern Tile map[MAP_WIDTH][MAP_HEIGHT];
 
 
-void map_break_block(int x, int y, Tile end_tile);
+void map_break_block(int map_x, int map_y, Tile end_tile);
+void map_explode_block(int map_x, int map_y);
 
 #endif // _MAP_H_

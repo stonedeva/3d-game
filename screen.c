@@ -12,8 +12,9 @@
 #include <assert.h>
 #include <math.h>
 
-SpriteManager sprite_mgr = {0};
 
+SpriteManager sprite_mgr = {0};
+double zbuffer[SCREEN_WIDTH] = {0};
 
 Screen screen_init(int* pixels)
 {
@@ -22,7 +23,7 @@ Screen screen_init(int* pixels)
 
     screen.bitmap = bitmap_load("./res/bitmap.png");
 
-    //sprite_load(&sprite_mgr, "./res/barrel.png", 22, 15);
+    sprite_load(&sprite_mgr, "./res/barrel.png", 20, 12);
 
     return screen;
 }
@@ -161,7 +162,7 @@ void screen_render_walls(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
 
 	double step = 1.0 * TEX_HEIGHT / line_height;
 	double tex_pos = (draw_start - SCREEN_HEIGHT / 2 + line_height / 2) * step;
-
+	
 	for (int y = draw_start; y < draw_end; y++) {
 	    int tex_y = (int)tex_pos & (TEX_HEIGHT - 1);
 	    tex_pos += step;
@@ -169,10 +170,11 @@ void screen_render_walls(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
 	    if (ray.side == 1) {
 		color = (color >> 1) & 8355711;
 	    }
-	    if (color != 0xffff00ff) {
+	    if (color != INVISIBLE_COLOR) {
 		screen->pixels[y * SCREEN_WIDTH + x] = color;
 	    }
 	}
+	zbuffer[x] = ray.perp_wall_dist;
     }
 }
 
@@ -180,4 +182,5 @@ void screen_render(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
 {
     screen_render_floor(screen, dir, plane, pos);
     screen_render_walls(screen, dir, plane, pos);
+    sprite_render(screen, &sprite_mgr, pos, dir, plane);
 }

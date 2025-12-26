@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include "./vec2.h"
 #include "./bitmap.h"
+#include "./game.h"
 
 #define FOV 60
 
@@ -20,6 +21,8 @@ typedef struct {
     double perp_wall_dist;
     int side;
 } Ray;
+
+extern double zbuffer[SCREEN_WIDTH];
 
 
 Screen screen_init(int* pixels);

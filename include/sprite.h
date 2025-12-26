@@ -2,6 +2,7 @@
 #define _SPRITE_H_
 
 #include <stddef.h>
+#include "./screen.h"
 #include "./vec2.h"
 
 #define SPRITE_WIDTH 32
@@ -11,13 +12,15 @@
 typedef struct {
     int pixels[SPRITE_WIDTH * SPRITE_HEIGHT];
     Vec2 pos;
-} GameSprite;
+} Sprite;
 
 typedef struct {
-    GameSprite sprites[SPRITE_CAP];
+    Sprite sprites[SPRITE_CAP];
     int sprite_count;
 } SpriteManager;
 
+
 void sprite_load(SpriteManager* manager, char* file_path, double x, double y);
+void sprite_render(Screen* screen, SpriteManager* manager, Vec2* pos, Vec2* dir, Vec2* plane);
 
 #endif // _SPRITE_H_

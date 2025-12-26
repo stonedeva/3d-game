@@ -1,5 +1,6 @@
 #include "./menu.h"
 #include "./game.h"
+#include "./sound.h"
 #include <SDL2/SDL_ttf.h>
 
 
@@ -44,6 +45,7 @@ void menu_handle_input(SDL_Event* ev)
 		break;
 	    }
 	    selected--;
+	    sound_play(SOUND_MENU_SELECT);
 	    break;
 	case SDL_SCANCODE_DOWN:
 	    if (selected >= OPT_COUNT-1) {
@@ -51,6 +53,7 @@ void menu_handle_input(SDL_Event* ev)
 		break;
 	    }
 	    selected++;
+	    sound_play(SOUND_MENU_SELECT);
 	    break;
 	case SDL_SCANCODE_RETURN:
 	    if (selected == OPT_START) {

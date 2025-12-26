@@ -1,9 +1,8 @@
 - Gates
 - More types of blocks (special/interactable blocks)
-- Sounds
+- Sounds [x]
 - Sprites
 - Items
 - GUI
-- Door
 - Random level generation
 - More performance (higher FPS)

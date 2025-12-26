@@ -4,10 +4,12 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_mixer.h>
 #include "./game.h"
 #include "./map.h"
 #include "./player.h"
 #include "./screen.h"
+#include "./sound.h"
 #include "./menu.h"
 
 int tick_count = 0;
@@ -110,18 +112,44 @@ void map_load_from_file(char* file_path)
     fclose(fp);
 }
 
-int init(void)
+int init_sdl_libs(void)
 {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-	fprintf(stderr, "SDL_Init(): Could not init sdl: %s\n", SDL_GetError());
+	fprintf(stderr, "SDL_Init(): Could not init video: %s\n", SDL_GetError());
+	return 1;
+    }
+    if (SDL_Init(SDL_INIT_AUDIO) < 0) {
+	fprintf(stderr, "SDL_Init(): Could not init audio: %s\n", SDL_GetError());
 	return 1;
     }
     if (!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG)) {
 	fprintf(stderr, "IMG_Init(): Could not init image: %s\n", IMG_GetError());
+	SDL_Quit();
+	return 1;
+    }
+    if (Mix_Init(MIX_INIT_MP3 | MIX_INIT_OGG) == 0) {
+	fprintf(stderr, "Mix_Init(): Could not init mixer: %s\n", Mix_GetError());
+	SDL_Quit();
 	return 1;
     }
     if (TTF_Init() < 0) {
 	fprintf(stderr, "TTF_Init(): Could not init ttf: %s\n", TTF_GetError());
+	SDL_Quit();
+	return 1;
+    }
+}
+
+void quit(void)
+{
+    Mix_Quit();
+    TTF_Quit();
+    IMG_Quit();
+    SDL_Quit();
+}
+
+int init(void)
+{
+    if (init_sdl_libs() == 1) {
 	return 1;
     }
 
@@ -161,12 +189,13 @@ int init(void)
 
     player = player_init();
     screen = screen_init(pixels);
+    sound_init();
 
     run_loop(window, renderer, texture);
 
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
-    SDL_Quit();
+    quit();
 
     return 0;
 }
