@@ -1,6 +1,7 @@
 #include "./player.h"
 #include "./map.h"
 #include "./game.h"
+#include "./sprite.h"
 #include <stdbool.h>
 #include <SDL2/SDL.h>
 
@@ -61,6 +62,11 @@ void player_interact_block(Player* p, int map_x, int map_y)
 	map_explode_block(map_x, map_y);
 	break;
     }
+}
+
+void player_update(Player* p)
+{
+    player_handle_input(p);
 }
 
 void player_handle_input(Player* p)

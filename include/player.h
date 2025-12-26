@@ -22,5 +22,6 @@ void player_forward(Player* p);
 void player_backward(Player* p);
 void player_rotate(Player* p, int dir);
 void player_handle_input(Player* p);
+void player_update(Player* p);
 
 #endif // _PLAYER_H_

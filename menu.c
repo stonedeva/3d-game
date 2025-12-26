@@ -101,6 +101,6 @@ void menu_render(SDL_Renderer* renderer, GameState state)
 	} else {
 	    col = gray;
 	}
-	menu_render_text(renderer, font, col, options[i], 180, 180+90*i, SCREEN_WIDTH - 370, 50);
+	menu_render_text(renderer, font, col, options[i], 180, 160+90*i, SCREEN_WIDTH - 370, 50);	
     }
 }

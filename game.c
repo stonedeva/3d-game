@@ -10,6 +10,7 @@
 #include "./player.h"
 #include "./screen.h"
 #include "./sound.h"
+#include "./sprite.h"
 #include "./menu.h"
 
 int tick_count = 0;
@@ -23,7 +24,7 @@ GameState game_state = STATE_MENU;
 
 void update(void)
 {
-    player_handle_input(&player);
+    player_update(&player);
     tick_count++;
 }
 
@@ -83,7 +84,11 @@ void run_loop(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture)
 	frames++;
 
 	if (SDL_GetTicks() - timer >= 1000) {
-	    printf("FPS: %d, Ticks: %d\n", frames, tick_count);
+	    char win_title[29];
+	    snprintf(win_title, sizeof(win_title), "The Maze | FPS %d | Ticks %d",
+		    frames, tick_count);
+	    SDL_SetWindowTitle(window, win_title);
+	    printf("px: %f, py: %f\n", player.pos.x, player.pos.y);
 	    frames = 0;
 	    tick_count = 0;
 	    timer += 1000;
