@@ -11,6 +11,7 @@
 #define PLAYER_ROT_LEFT 1
 #define PLAYER_ATTACK_RANGE 8
 #define PLAYER_COOLDOWN_START 25.0f
+#define PLAYER_MAX_HEALTH 10
 
 typedef struct {
     float cooldown;

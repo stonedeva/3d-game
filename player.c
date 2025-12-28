@@ -126,7 +126,12 @@ void player_pickup_item(Player* p, int item_index)
 	sound_play(SOUND_COIN);
 	break;
     case ITEM_MEDKIT:
-	p->health += 3;
+	int medkit_health = 3;
+	if (p->health + medkit_health > PLAYER_MAX_HEALTH) {
+	    p->health = PLAYER_MAX_HEALTH;
+	} else {
+	    p->health += medkit_health;
+	}
 	sound_play(SOUND_MEDKIT);
 	break;
     }
