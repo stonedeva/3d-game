@@ -15,9 +15,12 @@ void sound_init()
 
     sound_load(SOUND_MENU_SELECT, "./res/sounds/menu_select.wav");
     sound_load(SOUND_WALL_DESTROY, "./res/sounds/wall_destroy.wav");
-    sound_load(SOUND_COIN, "./res/sounds/coin.wav");
+    sound_load(SOUND_TNT_EXPLOSION, "./res/sounds/explosion.wav");
+    sound_load(SOUND_PICKUP_KEY, "./res/sounds/coin.wav");
     sound_load(SOUND_PLAYER_DAMAGE, "./res/sounds/player_damage.wav");
     sound_load(SOUND_MEDKIT, "./res/sounds/medkit.wav");
+    sound_load(SOUND_WRONG, "./res/sounds/wrong.wav");
+    sound_load(SOUND_DOOR_OPEN, "./res/sounds/open_door.wav");
 }
 
 void sound_load(Sound sound_id, char* file_path)

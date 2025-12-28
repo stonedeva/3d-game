@@ -162,6 +162,8 @@ void* network_run_room(void* args)
     struct sockaddr_in server_addr, client_addr;
     Byte buffer[BUFFER_CAP];
 
+    strcpy(room->host->ip, "127.0.0.1");
+
     if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
 	fprintf(stderr, "ERROR: socket(): Failed to setup socket: %s\n",
 		strerror(errno));
@@ -171,6 +173,7 @@ void* network_run_room(void* args)
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(room->port);
+
     if (inet_pton(AF_INET, room->host->ip, &server_addr.sin_addr) <= 0) {
 	fprintf(stderr, "ERROR: inet_pton(): Invalid ip-address\n");
 	close(sockfd);

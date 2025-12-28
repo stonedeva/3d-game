@@ -143,6 +143,7 @@ int init(void)
     if (init_sdl_libs() == 1) {
 	return 1;
     }
+    SDL_ShowCursor(SDL_DISABLE);
 
     SDL_Window* window = SDL_CreateWindow("Game", SDL_WINDOWPOS_UNDEFINED, 
 						  SDL_WINDOWPOS_UNDEFINED,

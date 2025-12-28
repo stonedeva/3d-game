@@ -104,7 +104,7 @@ void menu_render(SDL_Renderer* renderer, GameState state)
 #ifndef LARGE_SCREEN
 	menu_render_text(renderer, font, col, options[i], 180, 160+90*i, SCREEN_WIDTH - 370, 50);	
 #else
-	menu_render_text(renderer, font, col, options[i], 180, 230+120*i, SCREEN_WIDTH - 370, 70);	
+	menu_render_text(renderer, font, col, options[i], 180, 220+100*i, SCREEN_WIDTH - 370, 70);	
 #endif // LARGE_SCREEN
     }
 }

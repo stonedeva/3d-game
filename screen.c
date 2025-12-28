@@ -74,7 +74,7 @@ void screen_render_floor(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
 	    if (y > SCREEN_HEIGHT / 2) {
 		screen->pixels[y * SCREEN_WIDTH + x] = 0x555555;
 	    } else {
-		screen->pixels[y * SCREEN_WIDTH + x] = 0x333333;
+		screen->pixels[y * SCREEN_WIDTH + x] = 0x222222;
 	    }
 	}
     }
@@ -180,9 +180,7 @@ void screen_render_walls(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
 	    if (ray.side == 1) {
 		color = (color >> 1) & 8355711;
 	    }
-	    if (color != INVISIBLE_COLOR) {
-		screen->pixels[y * SCREEN_WIDTH + x] = color;
-	    }
+	    screen->pixels[y * SCREEN_WIDTH + x] = color;
 	}
 	zbuffer[x] = ray.perp_wall_dist;
     }

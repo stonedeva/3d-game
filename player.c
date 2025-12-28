@@ -6,6 +6,7 @@
 #include "./item.h"
 #include <SDL2/SDL.h>
 
+
 Player player_init()
 {
     Player p = {0};
@@ -58,6 +59,15 @@ void player_interact_block(Player* p, int map_x, int map_y)
     case TILE_LIGHT_BREAKSTONE3:
     case TILE_LIGHT_BREAKSTONE4:
 	map_break_block(map_x, map_y, TILE_LIGHT_BREAKSTONE4);
+	break;
+    case TILE_DOOR:
+	if (p->has_key) {
+	    map[map_x][map_y] = 0;
+	    p->has_key = 0;
+	    sound_play(SOUND_DOOR_OPEN);
+	} else {
+	    sound_play(SOUND_WRONG);
+	}
 	break;
     case TILE_TNT:
 	map_explode_block(map_x, map_y);
@@ -123,7 +133,8 @@ void player_pickup_item(Player* p, int item_index)
 
     switch (items[item_index].type) {
     case ITEM_KEY:
-	sound_play(SOUND_COIN);
+	p->has_key = 1;
+	sound_play(SOUND_PICKUP_KEY);
 	break;
     case ITEM_MEDKIT:
 	int medkit_health = 3;
@@ -133,6 +144,8 @@ void player_pickup_item(Player* p, int item_index)
 	    p->health += medkit_health;
 	}
 	sound_play(SOUND_MEDKIT);
+	break;
+    case ITEM_SPEEDKIT:
 	break;
     }
     items[item_index] = (Item) {.type = ITEM_EMPTY};

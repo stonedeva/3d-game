@@ -5,9 +5,9 @@ Item items[ITEM_CAP] = {0};
 int item_count = 0;
 
 
-void item_load(ItemType type, Bitmap* bitmap, int bitmap_id, double x, double y)
+void item_load(ItemType type, Bitmap* bitmap, double x, double y)
 {
-    bitmap_id += BITMAP_ITEM_OFFSET;
+    int bitmap_id = BITMAP_ITEM_OFFSET + type;
     Item i = {0};
     i.type = type;
     i.sprite = sprite_load_from_bitmap(bitmap, bitmap_id, x, y, 2, 2, SPRITE_GROUND_VALUE);
@@ -16,8 +16,9 @@ void item_load(ItemType type, Bitmap* bitmap, int bitmap_id, double x, double y)
 
 void items_init(Bitmap* bitmap)
 {
-    item_load(ITEM_KEY, bitmap, ITEM_KEY, 10.0f, 8.0f);
-    item_load(ITEM_MEDKIT, bitmap, ITEM_MEDKIT, 12.0f, 14.5f);
+    item_load(ITEM_KEY, bitmap, 10.0f, 8.0f);
+    item_load(ITEM_MEDKIT, bitmap, 12.0f, 14.5f);
+    item_load(ITEM_SPEEDKIT, bitmap, 11.8f, 16.5f);
 }
 
 void items_update(Player* p)

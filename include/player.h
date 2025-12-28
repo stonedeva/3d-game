@@ -16,6 +16,7 @@
 typedef struct {
     float cooldown;
     int health;
+    bool has_key;
     Vec2 pos;
     Vec2 dir;
     Vec2 plane;
