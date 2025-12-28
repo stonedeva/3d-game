@@ -20,6 +20,7 @@ typedef enum {
 extern Tile map[MAP_WIDTH][MAP_HEIGHT];
 
 
+void map_load_from_file(char* file_path);
 void map_break_block(int map_x, int map_y, Tile end_tile);
 void map_explode_block(int map_x, int map_y);
 

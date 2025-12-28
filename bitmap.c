@@ -25,14 +25,6 @@ Bitmap bitmap_load(char* file_path)
 
     uint8_t* pixels = (uint8_t*)surface->pixels;
 
-    /* 8 bit for r,g,b (0-255 each) */
-    /*
-    if (surface->format->BitsPerPixel != 24) {
-        fprintf(stderr, "BitsPerPixel != 24: Could not read image file\n");
-        SDL_FreeSurface(surface);
-        exit(1);
-    }*/
-
     int bpp = surface->format->BytesPerPixel;
     for (int i = 0; i < TEX_COUNT; i++) {
 	int tx = (i % 8) * TEX_WIDTH;

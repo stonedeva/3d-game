@@ -27,7 +27,8 @@ extern Sprite sprites[SPRITE_CAP];
 extern int sprite_count;
 
 
-void sprite_load(char* file_path, double x, double y, int udiv, int vdiv, float vmove);
-void sprite_render(Screen* screen, Sprite* sprite, Vec2* pos, Vec2* dir, Vec2* plane);
+Sprite sprite_load_from_path(char* file_path, double x, double y, int udiv, int vdiv, float vmove);
+Sprite sprite_load_from_bitmap(Bitmap* bitmap, int bitmap_id, double x, double y, int udiv, int vdiv, float vmove);
+void sprite_render(Screen* screen, Sprite* sprite, Vec2* dir, Vec2* plane, Vec2* pos);
 
 #endif // _SPRITE_H_

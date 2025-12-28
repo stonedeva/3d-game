@@ -7,6 +7,7 @@
 #define BM_WIDTH 128
 #define BM_HEIGHT 128
 #define TEX_COUNT (BM_WIDTH*BM_HEIGHT) / (TEX_WIDTH*TEX_HEIGHT)
+#define BITMAP_ITEM_OFFSET 9
 
 static const int INVISIBLE_COLOR = 0xffff00ff;
 

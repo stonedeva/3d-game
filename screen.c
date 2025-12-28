@@ -2,7 +2,8 @@
 #include "./map.h"
 #include "./player.h"
 #include "./game.h"
-#include "./sprite.h"
+#include "./entity.h"
+#include "./item.h"
 #include "./vec2.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
@@ -27,7 +28,7 @@ Screen screen_init(int* pixels)
 
 void screen_render_floor(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
 {
-#ifndef OPTIMIZE_PERFORMANCE
+#ifndef LARGE_SCREEN
     for (int y = 0; y < SCREEN_HEIGHT; y++) {
 	Vec2 ray_dir0 = {
 	    dir->x - plane->x,
@@ -71,13 +72,13 @@ void screen_render_floor(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
     for (int y = 0; y < SCREEN_HEIGHT; y++) {
 	for (int x = 0; x < SCREEN_WIDTH; x++) {
 	    if (y > SCREEN_HEIGHT / 2) {
-		screen->pixels[y * SCREEN_WIDTH + x] = 0x777777;
+		screen->pixels[y * SCREEN_WIDTH + x] = 0x555555;
 	    } else {
-		screen->pixels[y * SCREEN_WIDTH + x] = 0x444444;
+		screen->pixels[y * SCREEN_WIDTH + x] = 0x333333;
 	    }
 	}
     }
-#endif // OPTIMIZE_PERFORMANCE
+#endif // LARGE_SCREEN
 }
 
 void screen_perform_dda(Ray* ray, int* map_x, int* map_y, Vec2* pos)
@@ -191,5 +192,6 @@ void screen_render(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
 {
     screen_render_floor(screen, dir, plane, pos);
     screen_render_walls(screen, dir, plane, pos);
-    sprite_render(screen, &sprites[0], pos, dir, plane);
+    entities_render(screen, dir, plane, pos);
+    items_render(screen, dir, plane, pos);
 }

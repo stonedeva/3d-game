@@ -1,8 +1,10 @@
 - Gates
+- Make only 1 render iteration for performance
 - More types of blocks (special/interactable blocks)
+- Multiplayer
 - Sounds [x]
-- Sprites
-- Items
+- Sprites [x]
+- Items [x]
 - GUI
 - Random level generation
 - More performance (higher FPS)

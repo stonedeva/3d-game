@@ -2,6 +2,7 @@
 #include "./sound.h"
 #include <time.h>
 #include <stdio.h>
+#include <errno.h>
 #include <string.h>
 
 
@@ -43,6 +44,25 @@ static int _map_lighten_color(int col, int degree)
 
     int new_col = (r << 16) | (g << 8) | b;
     return new_col;
+}
+
+void map_load_from_file(char* file_path)
+{
+    FILE* fp = fopen(file_path, "rb");
+    if (!fp) {
+	fprintf(stderr, "ERROR: fopen(): Failed to open map file: %s\n",
+		strerror(errno));
+	exit(1);
+    }
+
+    size_t n = fread(map, 1, MAP_WIDTH*MAP_HEIGHT, fp);
+    if (n != MAP_WIDTH*MAP_HEIGHT) {
+	fprintf(stderr, "ERROR: fread(): Expected %d bytes read %zu bytes: %s\n",
+		MAP_WIDTH*MAP_HEIGHT, n, strerror(errno));
+	exit(1);
+    }
+
+    fclose(fp);
 }
 
 void map_break_block(int map_x, int map_y, Tile last_tile)

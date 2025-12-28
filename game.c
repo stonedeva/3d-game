@@ -11,6 +11,8 @@
 #include "./screen.h"
 #include "./sound.h"
 #include "./sprite.h"
+#include "./entity.h"
+#include "./item.h"
 #include "./menu.h"
 
 int tick_count = 0;
@@ -25,6 +27,8 @@ GameState game_state = STATE_MENU;
 void update(void)
 {
     player_update(&player);
+    items_update(&player);
+    entities_update(&player);
     tick_count++;
 }
 
@@ -37,6 +41,7 @@ void render(SDL_Renderer* renderer, SDL_Texture* texture)
 	break;
     case STATE_INGAME:
 	screen_render(&screen, &player.dir, &player.plane, &player.pos);
+	//player_render(pixels, &player);
 	SDL_UpdateTexture(texture, 0, pixels, SCREEN_WIDTH * sizeof(int));
 	SDL_RenderClear(renderer);
 	SDL_RenderCopy(renderer, texture, 0, 0);
@@ -96,25 +101,6 @@ void run_loop(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture)
 
 	SDL_Delay(1000 / TARGET_FPS);
     }
-}
-
-void map_load_from_file(char* file_path)
-{
-    FILE* fp = fopen(file_path, "rb");
-    if (!fp) {
-	fprintf(stderr, "ERROR: fopen(): Failed to open map file: %s\n",
-		strerror(errno));
-	exit(1);
-    }
-
-    size_t n = fread(map, 1, MAP_WIDTH*MAP_HEIGHT, fp);
-    if (n != MAP_WIDTH*MAP_HEIGHT) {
-	fprintf(stderr, "ERROR: fread(): Expected %d bytes read %zu bytes: %s\n",
-		MAP_WIDTH*MAP_HEIGHT, n, strerror(errno));
-	exit(1);
-    }
-
-    fclose(fp);
 }
 
 int init_sdl_libs(void)
@@ -195,12 +181,12 @@ int init(void)
     player = player_init();
     screen = screen_init(pixels);
     sound_init();
+    items_init(&screen.bitmap);
 
     run_loop(window, renderer, texture);
 
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
-    quit();
 
     return 0;
 }
@@ -212,5 +198,8 @@ int main(int argc, char** argv)
 	map_load_from_file(map_path);
     }
 
-    return init();
+    int res = init();
+    sound_cleanup();
+    quit();
+    return res;
 }

@@ -8,7 +8,7 @@
 Sprite sprites[SPRITE_CAP] = {0};
 int sprite_count = 0;
 
-void sprite_load(char* file_path, double x, double y, int udiv, int vdiv, float vmove)
+Sprite sprite_load_from_path(char* file_path, double x, double y, int udiv, int vdiv, float vmove)
 {
     SDL_Surface* surface = IMG_Load(file_path);
     if (!surface) {
@@ -37,15 +37,24 @@ void sprite_load(char* file_path, double x, double y, int udiv, int vdiv, float 
 	}
     }
     SDL_FreeSurface(surface);
-
-    if (sprite_count >= SPRITE_CAP) {
-	fprintf(stderr, "SPRITE_CAP has been reached!\n");
-	exit(1);
-    }
-    sprites[sprite_count++] = sprite;
+    return sprite;
 }
 
-void sprite_render(Screen* screen, Sprite* sprite, Vec2* pos, Vec2* dir, Vec2* plane)
+Sprite sprite_load_from_bitmap(Bitmap* bitmap, int bitmap_id, double x, double y, int udiv, int vdiv, float vmove)
+{
+    Sprite sprite = {0};
+    sprite.pos = (Vec2) {x, y};
+    sprite.udiv = udiv;
+    sprite.vdiv = vdiv;
+    sprite.vmove = vmove;
+    
+    for (int i = 0; i < SPRITE_WIDTH*SPRITE_HEIGHT; i++) {
+	sprite.pixels[i] = bitmap->pixels[i][bitmap_id];
+    }
+    return sprite;
+}
+
+void sprite_render(Screen* screen, Sprite* sprite, Vec2* dir, Vec2* plane, Vec2* pos)
 {
     double sp_x = sprite->pos.x - pos->x;
     double sp_y = sprite->pos.y - pos->y;
@@ -56,6 +65,7 @@ void sprite_render(Screen* screen, Sprite* sprite, Vec2* pos, Vec2* dir, Vec2* p
 
     int vmove_screen = (int)(sprite->vmove / transf_y);
     int sp_screen_x = (int)((SCREEN_WIDTH / 2) * (1 + transf_x / transf_y));
+
     int sp_height = abs((int)(SCREEN_HEIGHT / transf_y)) / sprite->vdiv;
 	
     int start_y = -sp_height / 2 + SCREEN_HEIGHT / 2 + vmove_screen;
