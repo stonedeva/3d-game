@@ -40,22 +40,23 @@ void menu_handle_input(SDL_Event* ev)
     if (ev->type == SDL_KEYDOWN && ev->key.repeat == 0) {
 	switch (ev->key.keysym.scancode) {
 	case SDL_SCANCODE_UP:
+	    sound_play(SOUND_MENU_NAVIGATE);
 	    if (selected <= 0) {
 		selected = OPT_COUNT-1;
 		break;
 	    }
 	    selected--;
-	    sound_play(SOUND_MENU_SELECT);
 	    break;
 	case SDL_SCANCODE_DOWN:
+	    sound_play(SOUND_MENU_NAVIGATE);
 	    if (selected >= OPT_COUNT-1) {
 		selected = 0;
 		break;
 	    }
 	    selected++;
-	    sound_play(SOUND_MENU_SELECT);
 	    break;
 	case SDL_SCANCODE_RETURN:
+	    sound_play(SOUND_MENU_SELECT);
 	    if (selected == OPT_START) {
 		game_state = STATE_INGAME;
 		break;

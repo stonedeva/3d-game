@@ -13,12 +13,13 @@ void sound_init()
     }
     Mix_AllocateChannels(SOUND_CHANNELS);
 
+    sound_load(SOUND_MENU_NAVIGATE, "./res/sounds/menu_navigate.wav");
     sound_load(SOUND_MENU_SELECT, "./res/sounds/menu_select.wav");
     sound_load(SOUND_WALL_DESTROY, "./res/sounds/wall_destroy.wav");
     sound_load(SOUND_TNT_EXPLOSION, "./res/sounds/explosion.wav");
     sound_load(SOUND_PICKUP_KEY, "./res/sounds/coin.wav");
     sound_load(SOUND_PLAYER_DAMAGE, "./res/sounds/player_damage.wav");
-    sound_load(SOUND_MEDKIT, "./res/sounds/medkit.wav");
+    sound_load(SOUND_TIMEKIT, "./res/sounds/timekit.wav");
     sound_load(SOUND_WRONG, "./res/sounds/wrong.wav");
     sound_load(SOUND_DOOR_OPEN, "./res/sounds/open_door.wav");
 }

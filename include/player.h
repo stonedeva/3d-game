@@ -15,8 +15,7 @@
 
 typedef struct {
     float cooldown;
-    int health;
-    bool has_key;
+    int keys;
     Vec2 pos;
     Vec2 dir;
     Vec2 plane;
@@ -32,6 +31,5 @@ void player_render(int* pixels, Player* p);
 void player_pickup_item(Player* p, int item_index);
 void player_update(Player* p);
 bool player_check_collision(Player* p, Sprite* sprite, double radius);
-void player_take_damage(Player* p, int damage);
 
 #endif // _PLAYER_H_

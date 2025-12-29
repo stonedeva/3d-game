@@ -4,6 +4,7 @@
 #include "./sound.h"
 #include "./sprite.h"
 #include "./item.h"
+#include "./bitmap.h"
 #include <SDL2/SDL.h>
 
 
@@ -14,23 +15,30 @@ Player player_init()
     p.dir = (Vec2) {-1, 0};
     p.plane = (Vec2) {0, 0.66};
     p.cooldown = PLAYER_COOLDOWN_START;
-
     return p;
 }
 
 void player_forward(Player* p)
 {
-    if (map[(int)(p->pos.x + p->dir.x * PLAYER_SPEED)][(int)p->pos.y] == 0) 
+    int px0 = (int)(p->pos.x + p->dir.x * PLAYER_SPEED);
+    int py0 = (int)p->pos.y;
+    if (map[px0][py0] == TILE_EMPTY || map[px0][py0] == TILE_MAGIC_STONE) 
 	p->pos.x += p->dir.x * PLAYER_SPEED;
-    if (map[(int)p->pos.x][(int)(p->pos.y + p->dir.y * PLAYER_SPEED)] == 0) 
+    int px1 = (int)p->pos.x;
+    int py1 = (int)(p->pos.y + p->dir.y * PLAYER_SPEED);
+    if (map[px1][py1] == TILE_EMPTY || map[px1][py1] == TILE_MAGIC_STONE) 
 	p->pos.y += p->dir.y * PLAYER_SPEED;
 }
 
 void player_backward(Player* p)
 {
-    if (map[(int)(p->pos.x - p->dir.x * PLAYER_SPEED)][(int)p->pos.y] == 0) 
+    int px0 = (int)(p->pos.x - p->dir.x * PLAYER_SPEED);
+    int py0 = (int)p->pos.y;
+    if (map[px0][py0] == TILE_EMPTY || map[px0][py0] == TILE_MAGIC_STONE) 
 	p->pos.x -= p->dir.x * PLAYER_SPEED;
-    if (map[(int)p->pos.x][(int)(p->pos.y - p->dir.y * PLAYER_SPEED)] == 0) 
+    int px1 = (int)p->pos.x;
+    int py1 = (int)(p->pos.y - p->dir.y * PLAYER_SPEED);
+    if (map[px1][py1] == TILE_EMPTY || map[px1][py1] == TILE_MAGIC_STONE)
 	p->pos.y -= p->dir.y * PLAYER_SPEED;
 }
 
@@ -61,16 +69,17 @@ void player_interact_block(Player* p, int map_x, int map_y)
 	map_break_block(map_x, map_y, TILE_LIGHT_BREAKSTONE4);
 	break;
     case TILE_DOOR:
-	if (p->has_key) {
+	if (p->keys > 0) {
 	    map[map_x][map_y] = 0;
-	    p->has_key = 0;
+	    p->keys--;
 	    sound_play(SOUND_DOOR_OPEN);
 	} else {
 	    sound_play(SOUND_WRONG);
 	}
 	break;
-    case TILE_TNT:
-	map_explode_block(map_x, map_y);
+    case TILE_MAGIC_STONE:
+	map[map_x][map_y] = 0;
+	sound_play(SOUND_DOOR_OPEN);
 	break;
     }
 }
@@ -89,66 +98,34 @@ void player_game_over(Player* p)
 
 }
 
-void player_take_damage(Player* p, int damage)
-{
-    if (p->cooldown > 0.0f) {
-	return;
-    }
-    if (p->health - damage < 0) {
-	player_game_over(p);
-    } else {
-	p->health -= damage;
-    }
-
-    sound_play(SOUND_PLAYER_DAMAGE);
-    p->cooldown = PLAYER_COOLDOWN_START;
-}
-
-int damage_col_inc = 20;
-
-void player_render(int* pixels, Player* p)
-{
-    if (p->cooldown > 0.0f) {
-	return;
-    }
-    for (int i = 0; i < SCREEN_WIDTH*SCREEN_HEIGHT; i++) {
-	uint8_t r = (pixels[i] >> 24) & 0xFF; 
-	if (r + damage_col_inc > 255) {
-	    r = 255;
-	} else {
-	    r += damage_col_inc;
-	}
-	uint8_t g = (pixels[i] >> 16) & 0xFF; 
-	uint8_t b = (pixels[i] >> 8) & 0xFF;
-	uint8_t a = pixels[i] & 0xFF;
-	pixels[i] = (r << 24) | (g << 16) | (b << 8) | a;
-    }
-}
-
 void player_pickup_item(Player* p, int item_index)
 {
     if (item_index >= item_count) {
 	return;
     }
+    if (items[item_index].map != current_map_type) {
+	return;
+    }
 
     switch (items[item_index].type) {
     case ITEM_KEY:
-	p->has_key = 1;
+	p->keys++;
 	sound_play(SOUND_PICKUP_KEY);
+	items[item_index] = (Item) {.type = ITEM_EMPTY};
 	break;
-    case ITEM_MEDKIT:
-	int medkit_health = 3;
-	if (p->health + medkit_health > PLAYER_MAX_HEALTH) {
-	    p->health = PLAYER_MAX_HEALTH;
+    case ITEM_TIMEKIT:
+	game_timer += 60;
+	sound_play(SOUND_TIMEKIT);
+	items[item_index] = (Item) {.type = ITEM_EMPTY};
+	break;
+    case ITEM_LADDER:
+	if (current_map_type == MAP_CAVE) {
+	    map_switch(p, MAP_ICE);
 	} else {
-	    p->health += medkit_health;
+	    map_switch(p, MAP_CAVE);
 	}
-	sound_play(SOUND_MEDKIT);
-	break;
-    case ITEM_SPEEDKIT:
 	break;
     }
-    items[item_index] = (Item) {.type = ITEM_EMPTY};
 }
 
 void player_update(Player* p)

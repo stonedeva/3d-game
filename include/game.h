@@ -8,10 +8,11 @@ typedef enum {
 } GameState;
 
 extern GameState game_state;
+extern int game_timer;
 
 #ifndef LARGE_SCREEN
-    #define SCREEN_WIDTH 650
-    #define SCREEN_HEIGHT 450
+    #define SCREEN_WIDTH 600
+    #define SCREEN_HEIGHT 400
 #else
     #define SCREEN_WIDTH 700
     #define SCREEN_HEIGHT 500

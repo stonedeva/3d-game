@@ -59,7 +59,7 @@ void entities_update(Player* p)
     for (int i = 0; i < entity_count; i++) {
 	Entity e = entities[i];
 	if (player_check_collision(p, &e.sprite, 0.5f)) {
-	    player_take_damage(p, 1);
+	    //player_take_damage(p, 1);
 	}
     }
 }

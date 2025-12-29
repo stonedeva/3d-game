@@ -11,12 +11,12 @@
 #include "./screen.h"
 #include "./sound.h"
 #include "./sprite.h"
-#include "./entity.h"
 #include "./item.h"
 #include "./menu.h"
 
 int tick_count = 0;
 int pixels[SCREEN_WIDTH * SCREEN_HEIGHT];
+int game_timer = 5*60;
 
 // Forward declaration
 Player player;
@@ -28,7 +28,6 @@ void update(void)
 {
     player_update(&player);
     items_update(&player);
-    entities_update(&player);
     tick_count++;
 }
 
@@ -89,6 +88,8 @@ void run_loop(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture)
 	frames++;
 
 	if (SDL_GetTicks() - timer >= 1000) {
+	    game_timer--;
+
 	    char win_title[29];
 	    snprintf(win_title, sizeof(win_title), "The Maze | FPS %d | Ticks %d",
 		    frames, tick_count);
@@ -178,6 +179,8 @@ int init(void)
 	SDL_Quit();
 	return 1;
     }
+
+    memcpy(map, cave_map, sizeof(Tile) * MAP_WIDTH * MAP_HEIGHT);
 
     player = player_init();
     screen = screen_init(pixels);

@@ -2,7 +2,6 @@
 #include "./map.h"
 #include "./player.h"
 #include "./game.h"
-#include "./entity.h"
 #include "./item.h"
 #include "./vec2.h"
 #include <SDL2/SDL.h>
@@ -60,7 +59,11 @@ void screen_render_floor(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
 	    floor_y += step_y;
 
 	    // Floor
-	    int color = screen->bitmap.pixels[TEX_WIDTH * ty + tx][0];
+	    int bm_index = 0;
+	    if (current_map_type == MAP_ICE) {
+		bm_index = TILE_ICE_GROUND;
+	    }
+	    int color = screen->bitmap.pixels[TEX_WIDTH * ty + tx][bm_index];
 	    color = (color >> 1) & 8355711; // More darker
 	    screen->pixels[y * SCREEN_WIDTH + x] = color;
 	
@@ -190,6 +193,5 @@ void screen_render(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
 {
     screen_render_floor(screen, dir, plane, pos);
     screen_render_walls(screen, dir, plane, pos);
-    entities_render(screen, dir, plane, pos);
     items_render(screen, dir, plane, pos);
 }
