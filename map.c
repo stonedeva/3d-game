@@ -5,10 +5,24 @@
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 
 
 MapType current_map_type = MAP_CAVE;
 Tile map[MAP_WIDTH][MAP_HEIGHT] = {0};
+
+
+int map_colors[TILE_COUNT] = {
+    [TILE_DARK_STONE] = 0xff000000,
+    [TILE_LIGHT_STONE] = 0xff3c3c3c,
+    [TILE_LIGHT_BREAKSTONE0] = 0xff737373,
+    [TILE_DOOR] = 0xff63462a,
+    [TILE_ICE_DARK_STONE] = 0xff59507d,
+    [TILE_ICE_LIGHT_STONE] = 0xff8983a0,
+    [TILE_MAGIC_STONE] = 0xff303030,
+    [TILE_ICE_LIGHT_BREAKSTONE] = 0xff3e385b
+};
 
 Tile cave_map[MAP_WIDTH][MAP_HEIGHT] = {
     {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
@@ -79,6 +93,8 @@ void map_switch(Player* p, MapType type)
 	memcpy(map, ice_map, map_sz);
 	break;
     }
+    sound_play(SOUND_LEVEL_ENTRANCE);
+    SDL_Delay(500);
 }
 
 void map_load_from_file(char* file_path)
@@ -100,6 +116,40 @@ void map_load_from_file(char* file_path)
     fclose(fp);
 }
 
+void map_load_from_png(char* file_path)
+{
+    SDL_Surface* surface = IMG_Load(file_path);
+    if (!surface) {
+        fprintf(stderr, "map_load_from_png(): Could not load map\n");
+        exit(1);
+    }
+    
+    uint8_t* p = (uint8_t*)surface->pixels;
+    if (surface->format->BitsPerPixel != 24) {
+        fprintf(stderr, "BitsPerPixel != 24: Could not read image file\n");
+        SDL_FreeSurface(surface);
+        exit(1);
+    }
+
+    for (int x = 0; x < MAP_WIDTH; x++) {
+        for (int y = 0; y < MAP_HEIGHT; y++) {
+            uint8_t* px = p + x * surface->pitch + y * 3;
+	    uint8_t r = px[0];
+	    uint8_t g = px[1];
+	    uint8_t b = px[2];
+	    int color = (0xFF << 24) | (r << 16) | (g << 8) | b;
+
+	    for (int i = 0; i < TILE_COUNT; i++) {
+		if (map_colors[i] == color) {
+		    map[x][y] = i;
+		    break;
+		}
+	    }
+        }
+    }
+    SDL_FreeSurface(surface);
+}
+
 void map_break_block(int map_x, int map_y, Tile last_tile)
 {
     Tile tile = map[map_x][map_y];
@@ -113,9 +163,9 @@ void map_break_block(int map_x, int map_y, Tile last_tile)
 
 void map_dump()
 {
-    for (int y = 0; y < MAP_HEIGHT; y++) {
+    for (int x = 0; x < MAP_WIDTH; x++) {
 	printf("{");
-	for (int x = 0; x < MAP_WIDTH; x++) {
+	for (int y = 0; y < MAP_HEIGHT; y++) {
 	    printf("%d, ", map[x][y]);
 	}
 	printf("}\n");

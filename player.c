@@ -11,7 +11,7 @@
 Player player_init()
 {
     Player p = {0};
-    p.pos = (Vec2) {22, 12};
+    p.pos = (Vec2) {22,12};
     p.dir = (Vec2) {-1, 0};
     p.plane = (Vec2) {0, 0.66};
     p.cooldown = PLAYER_COOLDOWN_START;
@@ -67,6 +67,14 @@ void player_interact_block(Player* p, int map_x, int map_y)
     case TILE_LIGHT_BREAKSTONE3:
     case TILE_LIGHT_BREAKSTONE4:
 	map_break_block(map_x, map_y, TILE_LIGHT_BREAKSTONE4);
+	break;
+    case TILE_ICE_LIGHT_BREAKSTONE:
+	if (p->has_axe) {
+	    map[map_x][map_y] = 0;
+	    sound_play(SOUND_WALL_DESTROY);
+	} else {
+	    sound_play(SOUND_WRONG);
+	}
 	break;
     case TILE_DOOR:
 	if (p->keys > 0) {
@@ -124,6 +132,10 @@ void player_pickup_item(Player* p, int item_index)
 	} else {
 	    map_switch(p, MAP_CAVE);
 	}
+	break;
+    case ITEM_AXE:
+	p->has_axe = 1;
+	items[item_index] = (Item) {.type = ITEM_EMPTY};
 	break;
     }
 }

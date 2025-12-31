@@ -42,7 +42,7 @@ void render(SDL_Renderer* renderer, SDL_Texture* texture)
 	screen_render(&screen, &player.dir, &player.plane, &player.pos);
 	//player_render(pixels, &player);
 	SDL_UpdateTexture(texture, 0, pixels, SCREEN_WIDTH * sizeof(int));
-	SDL_RenderClear(renderer);
+	//SDL_RenderClear(renderer);
 	SDL_RenderCopy(renderer, texture, 0, 0);
 	break;
     }
@@ -112,6 +112,7 @@ int init_sdl_libs(void)
     }
     if (SDL_Init(SDL_INIT_AUDIO) < 0) {
 	fprintf(stderr, "SDL_Init(): Could not init audio: %s\n", SDL_GetError());
+	SDL_Quit();
 	return 1;
     }
     if (!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG)) {
@@ -180,7 +181,7 @@ int init(void)
 	return 1;
     }
 
-    memcpy(map, cave_map, sizeof(Tile) * MAP_WIDTH * MAP_HEIGHT);
+    map_load_from_png("./res/maps/cave.png");
 
     player = player_init();
     screen = screen_init(pixels);

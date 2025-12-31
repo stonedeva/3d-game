@@ -15,6 +15,7 @@ typedef enum {
     SOUND_TIMEKIT,
     SOUND_WRONG,
     SOUND_DOOR_OPEN,
+    SOUND_LEVEL_ENTRANCE,
     SOUND_COUNT
 } Sound;
 
