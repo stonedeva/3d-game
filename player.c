@@ -6,6 +6,7 @@
 #include "./item.h"
 #include "./bitmap.h"
 #include <SDL2/SDL.h>
+#include <assert.h>
 
 #define TESTING_MODE
 
@@ -94,6 +95,8 @@ void player_interact_block(Player* p, int map_x, int map_y)
     case TILE_FIRE_LIGHT_BREAKSTONE:
 	map_explode_block(map_x, map_y);
 	break;
+    default:
+	break;
     }
 }
 
@@ -108,7 +111,17 @@ bool player_check_collision(Player* p, Sprite* sprite, double radius)
 
 void player_game_over(Player* p)
 {
+    game_state = STATE_GAMEOVER;
+    sound_play(SOUND_VICTORY);
 
+    assert(game_timer == 0 && "game_timer is supposed to be <= 0");
+    game_timer = -1; /* To avoid sound play multiple times */
+}
+
+void player_victory(Player* p)
+{
+    game_state = STATE_VICTORY;
+    sound_play(SOUND_GAMEOVER);
 }
 
 void player_pickup_item(Player* p, int item_index)
@@ -158,6 +171,11 @@ void player_pickup_item(Player* p, int item_index)
 	game_timer -= (int)(game_timer / 4);
 	items[item_index] = (Item) {.type = ITEM_EMPTY};
 	sound_play(SOUND_WRONG);
+	break;
+    case ITEM_GOAL:
+	player_victory(p);
+	break;
+    default:
 	break;
     }
 }

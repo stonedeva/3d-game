@@ -67,6 +67,8 @@ void screen_render_floor(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
 	    case MAP_FIRE:
 		bm_index = TILE_FIRE_GROUND;
 		break;
+	    default:
+		break;
 	    }
 	    int color = screen->bitmap.pixels[TEX_WIDTH * ty + tx][bm_index];
 	    color = (color >> 1) & 8355711; // More darker

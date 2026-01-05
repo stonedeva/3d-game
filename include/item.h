@@ -33,6 +33,7 @@ void item_load(ItemType type, Bitmap* bitmap, MapType map, double x, double y);
 void item_load_with_scale(ItemType type, Bitmap* bitmap, MapType map, double x, double y,
 			  int udiv, int vdiv, float vmove);
 void items_init(Bitmap* bitmap);
+void items_update(Player* p);
 void items_render(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos);
 
 #endif // _ITEM_H_

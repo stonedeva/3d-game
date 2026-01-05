@@ -4,11 +4,15 @@
 typedef enum {
     STATE_MENU = 0,
     STATE_INGAME,
-    STATE_PAUSE
+    STATE_PAUSE,
+    STATE_VICTORY,
+    STATE_GAMEOVER,
 } GameState;
 
 extern GameState game_state;
 extern int game_timer;
+
+void game_reset(void);
 
 #ifndef LARGE_SCREEN
     #define SCREEN_WIDTH 600

@@ -1,4 +1,5 @@
 #include "./sound.h"
+#include <SDL2/SDL.h>
 
 
 Mix_Chunk* sounds[SOUND_COUNT] = {0};
@@ -24,6 +25,8 @@ void sound_init()
     sound_load(SOUND_DOOR_OPEN, "./res/sounds/open_door.wav");
     sound_load(SOUND_LEVEL_ENTRANCE, "./res/sounds/level_entrance.wav");
     sound_load(SOUND_EXPLOSION, "./res/sounds/explosion.wav");
+    sound_load(SOUND_VICTORY, "./res/sounds/victory.wav");
+    sound_load(SOUND_GAMEOVER, "./res/sounds/gameover.wav");
 }
 
 void sound_load(Sound sound_id, char* file_path)

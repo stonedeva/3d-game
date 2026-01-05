@@ -35,7 +35,7 @@ void items_init(Bitmap* bitmap)
     item_load(ITEM_KEY, bitmap, MAP_CAVE, 10.0f, 21.9f);
 
     // MAP_ICE
-    item_load(ITEM_KEY, bitmap, MAP_ICE, 7.0f, 5.0f);
+    item_load(ITEM_KEY, bitmap, MAP_ICE, 5.5f, 4.4f);
     item_load_with_scale(ITEM_LADDER, bitmap, MAP_ICE, 7.5f, 9.7f, 1, 1, SPRITE_GROUND_VALUE);
     item_load(ITEM_AXE, bitmap, MAP_ICE, 1.8f, 21.5f);
     item_load(ITEM_TIMEKIT, bitmap, MAP_ICE, 1.4f, 12.4f);

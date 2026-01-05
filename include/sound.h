@@ -17,6 +17,8 @@ typedef enum {
     SOUND_DOOR_OPEN,
     SOUND_LEVEL_ENTRANCE,
     SOUND_EXPLOSION,
+    SOUND_VICTORY,
+    SOUND_GAMEOVER,
     SOUND_COUNT
 } Sound;
 

@@ -34,4 +34,7 @@ void player_pickup_item(Player* p, int item_index);
 void player_update(Player* p);
 bool player_check_collision(Player* p, Sprite* sprite, double radius);
 
+void player_victory(Player* p);
+void player_game_over(Player* p);
+
 #endif // _PLAYER_H_

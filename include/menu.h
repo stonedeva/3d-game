@@ -13,7 +13,8 @@ typedef enum {
 } Options;
 
 
-void menu_render(SDL_Renderer* renderer, GameState state);
+void menu_init();
+void menu_render(SDL_Renderer* renderer);
 void menu_handle_input(SDL_Event* ev);
 
 #endif // _MENU_H_

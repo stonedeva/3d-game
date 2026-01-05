@@ -36,6 +36,8 @@ typedef enum {
 extern MapType current_map_type;
 extern Tile map[MAP_WIDTH][MAP_HEIGHT];
 
+void map_load_from_file(char* file_path);
+void map_load_from_png(char* file_path);
 void map_switch(Player* p, MapType type);
 void map_load_from_file(char* file_path);
 void map_load_from_png(char* file_path);

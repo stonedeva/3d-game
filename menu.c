@@ -7,13 +7,29 @@
 SDL_Color white = {255, 255, 255, 255};
 SDL_Color gray = {200, 200, 200, 255};
 SDL_Color yellow = {204, 204, 0, 255};
+SDL_Color green = {0, 255, 0, 255};
+SDL_Color red = {255, 0, 0, 255};
 int selected = 0;
+
+SDL_Color title_color;
+char title_str[64] = "The Maze";
 
 char* options[OPT_COUNT] = {
     "Start",
     "Control",
     "Quit"
 };
+
+TTF_Font* font;
+
+void menu_init()
+{   
+    font = TTF_OpenFont("./res/font.ttf", 16);
+    if (!font) {
+	fprintf(stderr, "ERROR: TTF_OpenFont(): %s\n", TTF_GetError());
+	exit(1);
+    }
+}
 
 void menu_render_text(SDL_Renderer* renderer, TTF_Font* font, SDL_Color color, 
 		      char* text, int x, int y, int w, int h)
@@ -58,7 +74,11 @@ void menu_handle_input(SDL_Event* ev)
 	case SDL_SCANCODE_RETURN:
 	    sound_play(SOUND_MENU_SELECT);
 	    if (selected == OPT_START) {
-		game_state = STATE_INGAME;
+		if (game_state != STATE_GAMEOVER || game_state != STATE_VICTORY) {
+		    game_state = STATE_INGAME;
+		} else {
+		    game_reset();
+		}
 		break;
 	    }
 	    if (selected == OPT_QUIT) {
@@ -66,35 +86,38 @@ void menu_handle_input(SDL_Event* ev)
 		exit(1);
 	    }
 	    break;
+	default:
+	    break;
 	}
     }
 }
 
-void menu_render(SDL_Renderer* renderer, GameState state)
+void menu_render(SDL_Renderer* renderer)
 {
-    if (state == STATE_PAUSE) {
+    switch (game_state) {
+    case STATE_MENU:
+	strcpy(title_str, "The Maze");
+	title_color = white;
+	break;
+    case STATE_PAUSE:
 	options[0] = "Continue";
-	SDL_Texture* transparent_back = SDL_CreateTexture(
-	    renderer,
-	    SDL_PIXELFORMAT_RGBA8888,
-	    SDL_TEXTUREACCESS_TARGET,
-	    SCREEN_WIDTH,
-	    SCREEN_HEIGHT
-	);
-	SDL_SetTextureBlendMode(transparent_back, SDL_BLENDMODE_BLEND);
-	SDL_SetRenderDrawColor(renderer, 128, 128, 128, 128);
-    } else {
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+	break;
+    case STATE_VICTORY:
+	strcpy(title_str, "Victory");
+	title_color = green;
+	break;
+    case STATE_GAMEOVER:
+	strcpy(title_str, "Game Over");
+	title_color = red;
+	break;
+    default:
+	break;
     }
+
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
 
-    TTF_Font* font = TTF_OpenFont("./res/font.ttf", 16);
-    if (!font) {
-	fprintf(stderr, "ERROR: TTF_OpenFont(): %s\n", TTF_GetError());
-	exit(1);
-    }
-
-    menu_render_text(renderer, font, white, "The Maze", 15, 20, SCREEN_WIDTH - 20, (int)SCREEN_HEIGHT / 4);
+    menu_render_text(renderer, font, title_color, title_str, 15, 20, SCREEN_WIDTH - 20, (int)SCREEN_HEIGHT / 4);
     for (int i = 0; i < OPT_COUNT; i++) {
 	SDL_Color col;
 	if (i == selected) {

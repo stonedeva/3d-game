@@ -14,14 +14,22 @@
 #include "./item.h"
 #include "./menu.h"
 
+#ifdef TARGET_BROWSER
+#include <emscripten/emscripten.h>
+#endif // TARGET_BROWSER
+
 int tick_count = 0;
 int pixels[SCREEN_WIDTH * SCREEN_HEIGHT];
-int game_timer = 5*60;
+int game_timer = 20*60;
 
 // Forward declaration
 Player player;
 Screen screen;
 GameState game_state = STATE_MENU;
+
+SDL_Window* window;
+SDL_Renderer* renderer;
+SDL_Texture* texture;
 
 
 void update(void)
@@ -36,20 +44,20 @@ void render(SDL_Renderer* renderer, SDL_Texture* texture)
     switch (game_state) {
     case STATE_MENU:
     case STATE_PAUSE:
-	menu_render(renderer, game_state);
+    case STATE_VICTORY:
+    case STATE_GAMEOVER:
+	menu_render(renderer);
 	break;
     case STATE_INGAME:
 	screen_render(&screen, &player.dir, &player.plane, &player.pos);
-	//player_render(pixels, &player);
 	SDL_UpdateTexture(texture, 0, pixels, SCREEN_WIDTH * sizeof(int));
-	//SDL_RenderClear(renderer);
 	SDL_RenderCopy(renderer, texture, 0, 0);
 	break;
     }
     SDL_RenderPresent(renderer);
 }
 
-void run_loop(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture)
+void main_loop(void)
 {
     SDL_Event ev;
     int running = 1;
@@ -88,10 +96,12 @@ void run_loop(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture)
 	frames++;
 
 	if (SDL_GetTicks() - timer >= 1000) {
-	    if (game_timer <= 0) {
+	    if (game_timer == 0) {
 		player_game_over(&player);
 	    }
-	    game_timer--;
+	    if (game_state == STATE_INGAME) {
+		game_timer--;
+	    }
 
 	    char win_title[29];
 	    snprintf(win_title, sizeof(win_title), "The Maze | FPS %d | Ticks %d",
@@ -133,6 +143,7 @@ int init_sdl_libs(void)
 	SDL_Quit();
 	return 1;
     }
+    return 0;
 }
 
 void quit(void)
@@ -143,6 +154,13 @@ void quit(void)
     SDL_Quit();
 }
 
+void game_reset(void)
+{
+    game_state = STATE_INGAME;
+    current_map_type = MAP_CAVE;
+    player = player_init();
+}
+
 int init(void)
 {
     if (init_sdl_libs() == 1) {
@@ -150,7 +168,7 @@ int init(void)
     }
     SDL_ShowCursor(SDL_DISABLE);
 
-    SDL_Window* window = SDL_CreateWindow("Game", SDL_WINDOWPOS_UNDEFINED, 
+    window = SDL_CreateWindow("Game", SDL_WINDOWPOS_UNDEFINED, 
 						  SDL_WINDOWPOS_UNDEFINED,
 						  SCREEN_WIDTH, SCREEN_HEIGHT, 
 						  SDL_WINDOW_SHOWN);
@@ -160,7 +178,7 @@ int init(void)
 	return 1;
     }
 
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (!renderer) {
 	fprintf(stderr, "SDL_CreateRenderer(): Could not create renderer: %s\n", 
 		SDL_GetError());
@@ -169,7 +187,7 @@ int init(void)
 	return 1;
     }
 
-    SDL_Texture* texture = SDL_CreateTexture(
+    texture = SDL_CreateTexture(
 	renderer,
 	SDL_PIXELFORMAT_ARGB8888,
 	SDL_TEXTUREACCESS_STREAMING,
@@ -183,6 +201,7 @@ int init(void)
 	SDL_Quit();
 	return 1;
     }
+    menu_init();
 
     map_load_from_png("./res/maps/cave.png");
 
@@ -191,7 +210,7 @@ int init(void)
     sound_init();
     items_init(&screen.bitmap);
 
-    run_loop(window, renderer, texture);
+    main_loop();
 
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
@@ -201,11 +220,6 @@ int init(void)
 
 int main(int argc, char** argv)
 {
-    if (argc >= 2) {
-	char* map_path = argv[1];
-	map_load_from_file(map_path);
-    }
-
     int res = init();
     sound_cleanup();
     quit();
