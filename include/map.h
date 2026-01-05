@@ -21,24 +21,26 @@ typedef enum {
     TILE_ICE_LIGHT_STONE,
     TILE_MAGIC_STONE,
     TILE_ICE_LIGHT_BREAKSTONE,
+    TILE_FIRE_GROUND,
+    TILE_FIRE_DARK_STONE,
+    TILE_FIRE_LIGHT_BREAKSTONE,
     TILE_COUNT
 } Tile;
 
 typedef enum {
     MAP_CAVE,
-    MAP_ICE
+    MAP_ICE,
+    MAP_FIRE
 } MapType;
 
 extern MapType current_map_type;
 extern Tile map[MAP_WIDTH][MAP_HEIGHT];
-extern Tile cave_map[MAP_WIDTH][MAP_HEIGHT];
-extern Tile ice_map[MAP_WIDTH][MAP_HEIGHT];
-
 
 void map_switch(Player* p, MapType type);
 void map_load_from_file(char* file_path);
 void map_load_from_png(char* file_path);
 void map_break_block(int map_x, int map_y, Tile end_tile);
+void map_explode_block(int map_x, int map_y);
 void map_dump();
 
 #endif // _MAP_H_

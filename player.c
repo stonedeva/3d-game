@@ -7,6 +7,7 @@
 #include "./bitmap.h"
 #include <SDL2/SDL.h>
 
+#define TESTING_MODE
 
 Player player_init()
 {
@@ -14,6 +15,11 @@ Player player_init()
     p.pos = (Vec2) {22,12};
     p.dir = (Vec2) {-1, 0};
     p.plane = (Vec2) {0, 0.66};
+#ifdef TESTING_MODE
+    p.keys = 200;
+    p.has_axe = 1;
+    p.has_torch = 1;
+#endif // TESTING_MODE
     p.cooldown = PLAYER_COOLDOWN_START;
     return p;
 }
@@ -85,9 +91,8 @@ void player_interact_block(Player* p, int map_x, int map_y)
 	    sound_play(SOUND_WRONG);
 	}
 	break;
-    case TILE_MAGIC_STONE:
-	map[map_x][map_y] = 0;
-	sound_play(SOUND_DOOR_OPEN);
+    case TILE_FIRE_LIGHT_BREAKSTONE:
+	map_explode_block(map_x, map_y);
 	break;
     }
 }
@@ -127,15 +132,32 @@ void player_pickup_item(Player* p, int item_index)
 	items[item_index] = (Item) {.type = ITEM_EMPTY};
 	break;
     case ITEM_LADDER:
-	if (current_map_type == MAP_CAVE) {
+	switch (current_map_type) {
+	case MAP_CAVE:
 	    map_switch(p, MAP_ICE);
-	} else {
+	    break;
+	case MAP_ICE:
+	    map_switch(p, MAP_FIRE);
+	    break;
+	case MAP_FIRE:
 	    map_switch(p, MAP_CAVE);
+	    break;
 	}
 	break;
     case ITEM_AXE:
 	p->has_axe = 1;
 	items[item_index] = (Item) {.type = ITEM_EMPTY};
+	break;
+    case ITEM_TORCH:
+	p->has_torch = 1;
+	items[item_index] = (Item) {.type = ITEM_EMPTY};
+	break;
+    case ITEM_FAKEKIT:
+	if (game_timer < 30)
+	    break;
+	game_timer -= (int)(game_timer / 4);
+	items[item_index] = (Item) {.type = ITEM_EMPTY};
+	sound_play(SOUND_WRONG);
 	break;
     }
 }

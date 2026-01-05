@@ -16,7 +16,7 @@ int main(void)
     }
 
     printf("int map_colors[TILE_COUNT] = {\n");
-    for (int x = 0; x < 8; x++) {
+    for (int x = 0; x < 10; x++) {
         uint8_t* px = p + x * surface->format->BytesPerPixel;
         uint8_t r, g, b;
         SDL_GetRGB(*(int*)px, surface->format, &r, &g, &b);

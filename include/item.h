@@ -13,7 +13,10 @@ typedef enum {
     ITEM_KEY,
     ITEM_TIMEKIT,
     ITEM_LADDER,
-    ITEM_AXE
+    ITEM_AXE,
+    ITEM_TORCH,
+    ITEM_FAKEKIT,
+    ITEM_GOAL
 } ItemType;
 
 typedef struct {

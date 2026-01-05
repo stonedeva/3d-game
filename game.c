@@ -88,6 +88,9 @@ void run_loop(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture)
 	frames++;
 
 	if (SDL_GetTicks() - timer >= 1000) {
+	    if (game_timer <= 0) {
+		player_game_over(&player);
+	    }
 	    game_timer--;
 
 	    char win_title[29];

@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
+#include <assert.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
@@ -21,7 +22,9 @@ int map_colors[TILE_COUNT] = {
     [TILE_ICE_DARK_STONE] = 0xff59507d,
     [TILE_ICE_LIGHT_STONE] = 0xff8983a0,
     [TILE_MAGIC_STONE] = 0xff303030,
-    [TILE_ICE_LIGHT_BREAKSTONE] = 0xff3e385b
+    [TILE_ICE_LIGHT_BREAKSTONE] = 0xff3e385b,
+    [TILE_FIRE_DARK_STONE] = 0xff742134,
+    [TILE_FIRE_LIGHT_BREAKSTONE] = 0xffa86575 
 };
 
 void map_switch(Player* p, MapType type)
@@ -37,9 +40,12 @@ void map_switch(Player* p, MapType type)
     case MAP_ICE:
 	map_load_from_png("./res/maps/ice.png");
 	break;
+    case MAP_FIRE:
+	map_load_from_png("./res/maps/fire.png");
+	break;
     }
     sound_play(SOUND_LEVEL_ENTRANCE);
-    SDL_Delay(500);
+    SDL_Delay(250);
 }
 
 void map_load_from_file(char* file_path)
@@ -84,14 +90,13 @@ void map_load_from_png(char* file_path)
 	    uint8_t b = px[2];
 	    int color = (0xFF << 24) | (r << 16) | (g << 8) | b;
 
-	    printf("(%d,%d): 0x%02x: id: ", x, y, color);
-
 	    for (int i = 0; i < TILE_COUNT; i++) {
 		if (map_colors[i] == color) {
 		    map[x][y] = i;
 		    break;
 		} else {
-		    // Important to avoid remaining tiles from other levels being rendered
+		    // Important to avoid remaining tiles 
+		    // from other levels being rendered
 		    map[x][y] = 0;
 		}
 	    }
@@ -109,6 +114,20 @@ void map_break_block(int map_x, int map_y, Tile last_tile)
 	map[map_x][map_y] = TILE_EMPTY;
 	sound_play(SOUND_WALL_DESTROY);
     }
+}
+
+void map_explode_block(int map_x, int map_y)
+{
+    assert(map[map_x][map_y] == TILE_FIRE_LIGHT_BREAKSTONE && 
+	   "map_explode_block(): Expected TILE_FIRE_LIGHT_BREAKSTONE!\n");
+
+    map[map_x][map_y] = TILE_EMPTY;
+    sound_play(SOUND_EXPLOSION);
+
+    map[map_x][map_y+1] = TILE_EMPTY;
+    map[map_x][map_y-1] = TILE_EMPTY;
+    map[map_x+1][map_y] = TILE_EMPTY;
+    map[map_x-1][map_y] = TILE_EMPTY;
 }
 
 void map_dump()

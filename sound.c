@@ -23,6 +23,7 @@ void sound_init()
     sound_load(SOUND_WRONG, "./res/sounds/wrong.wav");
     sound_load(SOUND_DOOR_OPEN, "./res/sounds/open_door.wav");
     sound_load(SOUND_LEVEL_ENTRANCE, "./res/sounds/level_entrance.wav");
+    sound_load(SOUND_EXPLOSION, "./res/sounds/explosion.wav");
 }
 
 void sound_load(Sound sound_id, char* file_path)
