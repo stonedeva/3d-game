@@ -3,7 +3,7 @@
 
 #include <SDL2/SDL_mixer.h>
 
-#define SOUND_CHANNELS 32
+#define SOUND_CHANNELS 64
 
 typedef enum {
     SOUND_MENU_NAVIGATE = 0,

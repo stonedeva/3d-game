@@ -45,10 +45,13 @@ void sound_load(Sound sound_id, char* file_path)
 
 void sound_play(Sound sound_id)
 {
-    if (Mix_PlayChannel(-1, sounds[sound_id], 0) < 0) {
+    if (sound_id < 0 || sound_id > SOUND_COUNT)
+	return;
+
+    int channel = Mix_PlayChannel(-1, sounds[sound_id], 0);
+    if (channel < 0) {
 	fprintf(stderr, "ERROR: MixPlayChannel(): Failed to play sound: %s\n",
 		Mix_GetError());
-	exit(1);
     }
 }
 

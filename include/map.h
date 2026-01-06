@@ -24,13 +24,16 @@ typedef enum {
     TILE_FIRE_GROUND,
     TILE_FIRE_DARK_STONE,
     TILE_FIRE_LIGHT_BREAKSTONE,
+    TILE_OVERWORLD_GRASS_GROUND,
+    TILE_OVERWORLD_DIRT_GROUND,
     TILE_COUNT
 } Tile;
 
 typedef enum {
     MAP_CAVE,
     MAP_ICE,
-    MAP_FIRE
+    MAP_FIRE,
+    MAP_OVERWORLD
 } MapType;
 
 extern MapType current_map_type;

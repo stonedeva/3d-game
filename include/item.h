@@ -12,7 +12,7 @@ typedef enum {
     ITEM_EMPTY = 0,
     ITEM_KEY,
     ITEM_TIMEKIT,
-    ITEM_LADDER,
+    ITEM_LADDER, // FIXME: Ladder is no longer an item but keep for now to offset correctly
     ITEM_AXE,
     ITEM_TORCH,
     ITEM_FAKEKIT,

@@ -24,7 +24,7 @@ int map_colors[TILE_COUNT] = {
     [TILE_MAGIC_STONE] = 0xff303030,
     [TILE_ICE_LIGHT_BREAKSTONE] = 0xff3e385b,
     [TILE_FIRE_DARK_STONE] = 0xff742134,
-    [TILE_FIRE_LIGHT_BREAKSTONE] = 0xffa86575 
+    [TILE_FIRE_LIGHT_BREAKSTONE] = 0xffa86575,
 };
 
 void map_switch(Player* p, MapType type)
@@ -42,6 +42,9 @@ void map_switch(Player* p, MapType type)
 	break;
     case MAP_FIRE:
 	map_load_from_png("./res/maps/fire.png");
+	break;
+    case MAP_OVERWORLD:
+	memset(map, 0, sizeof(Tile)*MAP_WIDTH*MAP_HEIGHT);
 	break;
     }
     sound_play(SOUND_LEVEL_ENTRANCE);

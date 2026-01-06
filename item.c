@@ -29,14 +29,13 @@ void item_load_with_scale(ItemType type, Bitmap* bitmap, MapType map, double x, 
 void items_init(Bitmap* bitmap)
 {
     // MAP_CAVE
+    item_load(ITEM_GOAL, bitmap, MAP_CAVE, 19.9f, 10.5f);
     item_load(ITEM_KEY, bitmap, MAP_CAVE, 10.0f, 8.0f);
     item_load(ITEM_TIMEKIT, bitmap, MAP_CAVE, 12.5f, 14.3f);
-    item_load_with_scale(ITEM_LADDER, bitmap, MAP_CAVE, 3.5f, 1.6f, 1, 1, SPRITE_GROUND_VALUE);
     item_load(ITEM_KEY, bitmap, MAP_CAVE, 10.0f, 21.9f);
 
     // MAP_ICE
     item_load(ITEM_KEY, bitmap, MAP_ICE, 5.5f, 4.4f);
-    item_load_with_scale(ITEM_LADDER, bitmap, MAP_ICE, 7.5f, 9.7f, 1, 1, SPRITE_GROUND_VALUE);
     item_load(ITEM_AXE, bitmap, MAP_ICE, 1.8f, 21.5f);
     item_load(ITEM_TIMEKIT, bitmap, MAP_ICE, 1.4f, 12.4f);
 

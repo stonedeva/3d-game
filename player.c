@@ -112,6 +112,7 @@ bool player_check_collision(Player* p, Sprite* sprite, double radius)
 void player_game_over(Player* p)
 {
     game_state = STATE_GAMEOVER;
+    printf("Play the sound");
     sound_play(SOUND_VICTORY);
 
     assert(game_timer == 0 && "game_timer is supposed to be <= 0");
@@ -144,19 +145,6 @@ void player_pickup_item(Player* p, int item_index)
 	sound_play(SOUND_TIMEKIT);
 	items[item_index] = (Item) {.type = ITEM_EMPTY};
 	break;
-    case ITEM_LADDER:
-	switch (current_map_type) {
-	case MAP_CAVE:
-	    map_switch(p, MAP_ICE);
-	    break;
-	case MAP_ICE:
-	    map_switch(p, MAP_FIRE);
-	    break;
-	case MAP_FIRE:
-	    map_switch(p, MAP_CAVE);
-	    break;
-	}
-	break;
     case ITEM_AXE:
 	p->has_axe = 1;
 	items[item_index] = (Item) {.type = ITEM_EMPTY};
@@ -174,6 +162,7 @@ void player_pickup_item(Player* p, int item_index)
 	break;
     case ITEM_GOAL:
 	player_victory(p);
+	items[item_index] = (Item) {.type = ITEM_EMPTY};
 	break;
     default:
 	break;

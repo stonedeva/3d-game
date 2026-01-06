@@ -13,6 +13,7 @@
 #include "./sprite.h"
 #include "./item.h"
 #include "./menu.h"
+#include "./ladder.h"
 
 #ifdef TARGET_BROWSER
 #include <emscripten/emscripten.h>
@@ -35,6 +36,7 @@ SDL_Texture* texture;
 void update(void)
 {
     player_update(&player);
+    ladders_update(&player);
     items_update(&player);
     tick_count++;
 }
@@ -203,12 +205,13 @@ int init(void)
     }
     menu_init();
 
-    map_load_from_png("./res/maps/cave.png");
-
     player = player_init();
     screen = screen_init(pixels);
     sound_init();
     items_init(&screen.bitmap);
+    ladders_init(&screen.bitmap);
+
+    map_load_from_png("./res/maps/cave.png");
 
     main_loop();
 

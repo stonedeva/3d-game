@@ -4,6 +4,7 @@
 #include "./game.h"
 #include "./item.h"
 #include "./vec2.h"
+#include "./ladder.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <stdio.h>
@@ -11,9 +12,11 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <math.h>
+#include <time.h>
 
 
 double zbuffer[SCREEN_WIDTH] = {0};
+void screen_generate_overworld_floor();
 
 Screen screen_init(int* pixels)
 {
@@ -21,8 +24,26 @@ Screen screen_init(int* pixels)
     screen.pixels = pixels;
 
     screen.bitmap = bitmap_load("./res/bitmap.png");
+    screen_generate_overworld_floor();
 
     return screen;
+}
+
+int overworld_floor_map[MAP_WIDTH][MAP_HEIGHT] = {0};
+
+void screen_generate_overworld_floor()
+{
+    srand(time(0));
+    for (int x = 0; x < MAP_WIDTH; x++) {
+	for (int y = 0; y < MAP_HEIGHT; y++) {
+	    double r = (double)rand() / (double)RAND_MAX; // 0 - 1, 0% - 100%
+	    if (r < 0.2) {
+		overworld_floor_map[x][y] = 1;
+	    } else {
+		overworld_floor_map[x][y] = 0;
+	    }
+	}
+    }
 }
 
 void screen_render_floor(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
@@ -59,23 +80,36 @@ void screen_render_floor(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
 	    floor_y += step_y;
 
 	    // Floor
-	    int bm_index = 0;
+	    int bm_floor_index = 0;
 	    switch (current_map_type) {
+	    case MAP_CAVE:
+		bm_floor_index = 0;
+		break;
 	    case MAP_ICE:
-		bm_index = TILE_ICE_GROUND;
+		bm_floor_index = TILE_ICE_GROUND;
 		break;
 	    case MAP_FIRE:
-		bm_index = TILE_FIRE_GROUND;
+		bm_floor_index = TILE_FIRE_GROUND;
 		break;
-	    default:
+	    case MAP_OVERWORLD:
+		if (overworld_floor_map[cell_x % MAP_WIDTH][cell_y % MAP_HEIGHT] == 0) {
+		    bm_floor_index = TILE_OVERWORLD_GRASS_GROUND;
+		} else {
+		    bm_floor_index = TILE_OVERWORLD_DIRT_GROUND;
+		}
 		break;
 	    }
-	    int color = screen->bitmap.pixels[TEX_WIDTH * ty + tx][bm_index];
+	    // Floor
+	    int color = screen->bitmap.pixels[TEX_WIDTH * ty + tx][bm_floor_index];
 	    color = (color >> 1) & 8355711; // More darker
 	    screen->pixels[y * SCREEN_WIDTH + x] = color;
-	
+
 	    // Celling
-	    screen->pixels[(SCREEN_HEIGHT - y - 1) * SCREEN_WIDTH + x] = color;
+	    if (current_map_type == MAP_OVERWORLD) {
+		screen->pixels[(SCREEN_HEIGHT - y - 1) * SCREEN_WIDTH + x] = 0;
+	    } else {
+		screen->pixels[(SCREEN_HEIGHT - y - 1) * SCREEN_WIDTH + x] = color;
+	    }
 	}
     }
 #else
@@ -122,8 +156,14 @@ void screen_perform_dda(Ray* ray, int* map_x, int* map_y, Vec2* pos)
 	    ray->side = 1;
 	}
 
-	if (map[*map_x][*map_y] > 0) {
+	if (*map_x < 0 || *map_x >= MAP_WIDTH ||
+	    *map_y < 0 || *map_y >= MAP_HEIGHT) {
 	    hit = 1;
+	}
+
+	if (map[*map_x][*map_y] > 0) {
+	    hit = -1;
+	    break;
 	}
     }
 }
@@ -166,6 +206,7 @@ void screen_render_walls(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
 	screen_calculate_perp_wall_dist(&ray, pos, &wall_x);
 
 	int tex_num = map[map_x][map_y];
+
 	int tex_x = (int)(wall_x * (double)TEX_WIDTH);
 	if (ray.side == 0 && ray_dir.x > 0) tex_x = TEX_WIDTH - tex_x - 1;
 	if (ray.side == 1 && ray_dir.y < 0) tex_x = TEX_HEIGHT - tex_x - 1;
@@ -199,6 +240,8 @@ void screen_render_walls(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
 void screen_render(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
 {
     screen_render_floor(screen, dir, plane, pos);
-    screen_render_walls(screen, dir, plane, pos);
+    if (current_map_type != MAP_OVERWORLD)
+	screen_render_walls(screen, dir, plane, pos);
     items_render(screen, dir, plane, pos);
+    ladders_render(screen, dir, plane, pos);
 }
