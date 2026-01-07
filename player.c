@@ -21,19 +21,25 @@ Player player_init()
     p.has_axe = 1;
     p.has_torch = 1;
 #endif // TESTING_MODE
-    p.cooldown = PLAYER_COOLDOWN_START;
     return p;
+}
+
+bool player_check_victory(Player* p)
+{
+    return current_map_type == MAP_OVERWORLD && p->pos.y >= 30;
 }
 
 void player_forward(Player* p)
 {
     int px0 = (int)(p->pos.x + p->dir.x * PLAYER_SPEED);
     int py0 = (int)p->pos.y;
-    if (map[px0][py0] == TILE_EMPTY || map[px0][py0] == TILE_MAGIC_STONE) 
+    if (map[px0][py0] == TILE_EMPTY || map[px0][py0] == TILE_MAGIC_STONE ||
+	map[px0][py0] == TILE_SECRET_PLATE) 
 	p->pos.x += p->dir.x * PLAYER_SPEED;
     int px1 = (int)p->pos.x;
     int py1 = (int)(p->pos.y + p->dir.y * PLAYER_SPEED);
-    if (map[px1][py1] == TILE_EMPTY || map[px1][py1] == TILE_MAGIC_STONE) 
+    if (map[px1][py1] == TILE_EMPTY || map[px1][py1] == TILE_MAGIC_STONE ||
+	map[px1][py1] == TILE_SECRET_PLATE) 
 	p->pos.y += p->dir.y * PLAYER_SPEED;
 }
 
@@ -41,11 +47,13 @@ void player_backward(Player* p)
 {
     int px0 = (int)(p->pos.x - p->dir.x * PLAYER_SPEED);
     int py0 = (int)p->pos.y;
-    if (map[px0][py0] == TILE_EMPTY || map[px0][py0] == TILE_MAGIC_STONE) 
+    if (map[px0][py0] == TILE_EMPTY || map[px0][py0] == TILE_MAGIC_STONE ||
+	map[px0][py0] == TILE_SECRET_PLATE)
 	p->pos.x -= p->dir.x * PLAYER_SPEED;
     int px1 = (int)p->pos.x;
     int py1 = (int)(p->pos.y - p->dir.y * PLAYER_SPEED);
-    if (map[px1][py1] == TILE_EMPTY || map[px1][py1] == TILE_MAGIC_STONE)
+    if (map[px1][py1] == TILE_EMPTY || map[px1][py1] == TILE_MAGIC_STONE ||
+	map[px1][py1] == TILE_SECRET_PLATE)
 	p->pos.y -= p->dir.y * PLAYER_SPEED;
 }
 
@@ -112,10 +120,8 @@ bool player_check_collision(Player* p, Sprite* sprite, double radius)
 void player_game_over(Player* p)
 {
     game_state = STATE_GAMEOVER;
-    printf("Play the sound");
     sound_play(SOUND_VICTORY);
 
-    assert(game_timer == 0 && "game_timer is supposed to be <= 0");
     game_timer = -1; /* To avoid sound play multiple times */
 }
 
@@ -160,10 +166,6 @@ void player_pickup_item(Player* p, int item_index)
 	items[item_index] = (Item) {.type = ITEM_EMPTY};
 	sound_play(SOUND_WRONG);
 	break;
-    case ITEM_GOAL:
-	player_victory(p);
-	items[item_index] = (Item) {.type = ITEM_EMPTY};
-	break;
     default:
 	break;
     }
@@ -171,31 +173,30 @@ void player_pickup_item(Player* p, int item_index)
 
 void player_update(Player* p)
 {
-    if (p->cooldown > 0.0f) {
-	p->cooldown -= 0.5f;
+    if (map[(int)p->pos.x][(int)p->pos.y] == TILE_SECRET_PLATE && is_plates_active) {
+	player_game_over(p);
     }
-
     player_handle_input(p);
 }
 
 void player_handle_input(Player* p)
 {
-    uint8_t* state = SDL_GetKeyboardState(0);
+    uint8_t* keystate = SDL_GetKeyboardState(0);
 
-    if (state[SDL_SCANCODE_W]) {
+    if (keystate[SDL_SCANCODE_W]) {
 	player_forward(p);
     }
-    if (state[SDL_SCANCODE_S]) {
+    if (keystate[SDL_SCANCODE_S]) {
 	player_backward(p);
     }
-    if (state[SDL_SCANCODE_RIGHT]) {
+    if (keystate[SDL_SCANCODE_RIGHT]) {
 	player_rotate(p, PLAYER_ROT_RIGHT);
     }
-    if (state[SDL_SCANCODE_LEFT]) {
+    if (keystate[SDL_SCANCODE_LEFT]) {
 	player_rotate(p, PLAYER_ROT_LEFT);
     }
 
-    uint8_t current_space = state[SDL_SCANCODE_SPACE];
+    uint8_t current_space = keystate[SDL_SCANCODE_SPACE];
     static uint8_t prev_space = 0;
     if (prev_space && !current_space) {
 	int map_x = (int)(p->pos.x + p->dir.x);

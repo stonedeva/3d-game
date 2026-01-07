@@ -23,6 +23,7 @@ void ladders_init(Bitmap* bitmap)
 {
     ladder_create(MAP_CAVE, MAP_ICE, bitmap, 3.5f, 1.6f);
     ladder_create(MAP_ICE, MAP_FIRE, bitmap, 7.5f, 9.2f);
+    ladder_create(MAP_FIRE, MAP_OVERWORLD, bitmap, 22.4f, 6.4f);
 }
 
 void ladders_render(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
@@ -40,7 +41,7 @@ void ladders_update(Player* p)
     for (int i = 0; i < ladder_count; i++) {
 	if (current_map_type != ladders[i].map1 && current_map_type != ladders[i].map2)
 	    continue;
-	if (player_check_collision(p, &ladders[i].sprite, 0.1f)) {
+	if (player_check_collision(p, &ladders[i].sprite, 0.3f)) {
 	    ladder_climb(&ladders[i], p);
 	}
     }

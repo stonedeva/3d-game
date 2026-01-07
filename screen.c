@@ -81,6 +81,7 @@ void screen_render_floor(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
 
 	    // Floor
 	    int bm_floor_index = 0;
+	    int bm_celling_index = 0;
 	    switch (current_map_type) {
 	    case MAP_CAVE:
 		bm_floor_index = 0;
@@ -99,6 +100,11 @@ void screen_render_floor(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
 		}
 		break;
 	    }
+	    bm_celling_index = bm_floor_index;
+	    if (map[cell_x % MAP_WIDTH][cell_y % MAP_HEIGHT] == TILE_SECRET_PLATE) {
+		bm_floor_index = TILE_SECRET_PLATE;
+	    }
+
 	    // Floor
 	    int color = screen->bitmap.pixels[TEX_WIDTH * ty + tx][bm_floor_index];
 	    color = (color >> 1) & 8355711; // More darker
@@ -161,8 +167,9 @@ void screen_perform_dda(Ray* ray, int* map_x, int* map_y, Vec2* pos)
 	    hit = 1;
 	}
 
-	if (map[*map_x][*map_y] > 0) {
-	    hit = -1;
+	if (map[*map_x][*map_y] > 0 &&
+	    (map[*map_x][*map_y] != TILE_SECRET_PLATE || is_plates_active)) {
+	    hit = 1;
 	    break;
 	}
     }

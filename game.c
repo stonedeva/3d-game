@@ -33,11 +33,14 @@ SDL_Renderer* renderer;
 SDL_Texture* texture;
 
 
-void update(void)
+void update(float delta_time)
 {
-    player_update(&player);
-    ladders_update(&player);
-    items_update(&player);
+    if (game_state == STATE_INGAME) {
+	map_update(delta_time);
+	player_update(&player);
+	ladders_update(&player);
+	items_update(&player);
+    }
     tick_count++;
 }
 
@@ -90,7 +93,7 @@ void main_loop(void)
 	delta += passed / ns_per_tick;
 
 	while (delta >= 1.0) {
-	    update();
+	    update(ns_per_tick / 1000000000.0f);
 	    delta -= 1.0;
 	}
 

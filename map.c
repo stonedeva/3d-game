@@ -11,8 +11,10 @@
 #include <SDL2/SDL_image.h>
 
 
+
 MapType current_map_type = MAP_CAVE;
 Tile map[MAP_WIDTH][MAP_HEIGHT] = {0};
+bool is_plates_active = 0;
 
 int map_colors[TILE_COUNT] = {
     [TILE_DARK_STONE] = 0xff252323,
@@ -25,7 +27,11 @@ int map_colors[TILE_COUNT] = {
     [TILE_ICE_LIGHT_BREAKSTONE] = 0xff3e385b,
     [TILE_FIRE_DARK_STONE] = 0xff742134,
     [TILE_FIRE_LIGHT_BREAKSTONE] = 0xffa86575,
+    [TILE_SECRET_PLATE] = 0xffffdc00
 };
+
+MapCoords secret_plates[SECRET_PLATE_CAP];
+int secret_plate_count;
 
 void map_switch(Player* p, MapType type)
 {
@@ -49,6 +55,23 @@ void map_switch(Player* p, MapType type)
     }
     sound_play(SOUND_LEVEL_ENTRANCE);
     SDL_Delay(250);
+}
+
+float plate_timer = 0.0f;
+
+void map_update(float delta_time)
+{
+    plate_timer += delta_time;
+    if (plate_timer >= 2.0f) {
+	plate_timer = 0.0f;
+	is_plates_active = !is_plates_active;
+	
+    }
+    for (int i = 0; i < secret_plate_count; i++) {
+	MapCoords plate_coords = secret_plates[i];
+	//map[plate_coords.x][plate_coords.y] = is_plates_active ? TILE_SECRET_PLATE
+					      //: TILE_EMPTY;
+    }
 }
 
 void map_load_from_file(char* file_path)
@@ -96,6 +119,9 @@ void map_load_from_png(char* file_path)
 	    for (int i = 0; i < TILE_COUNT; i++) {
 		if (map_colors[i] == color) {
 		    map[x][y] = i;
+		    if (i == TILE_SECRET_PLATE && secret_plate_count < SECRET_PLATE_CAP) {
+			secret_plates[secret_plate_count++] = (MapCoords){x,y};
+		    }
 		    break;
 		} else {
 		    // Important to avoid remaining tiles 

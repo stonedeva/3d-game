@@ -8,7 +8,8 @@
 Sprite sprites[SPRITE_CAP] = {0};
 int sprite_count = 0;
 
-Sprite sprite_load_from_path(char* file_path, double x, double y, int udiv, int vdiv, float vmove)
+Sprite sprite_load_from_path(char* file_path, double x, double y, 
+			     int udiv, int vdiv, float vmove)
 {
     SDL_Surface* surface = IMG_Load(file_path);
     if (!surface) {
@@ -40,7 +41,8 @@ Sprite sprite_load_from_path(char* file_path, double x, double y, int udiv, int 
     return sprite;
 }
 
-Sprite sprite_load_from_bitmap(Bitmap* bitmap, int bitmap_id, double x, double y, int udiv, int vdiv, float vmove)
+Sprite sprite_load_from_bitmap(Bitmap* bitmap, int bitmap_id, 
+			       double x, double y, int udiv, int vdiv, float vmove)
 {
     Sprite sprite = {0};
     sprite.pos = (Vec2) {x, y};

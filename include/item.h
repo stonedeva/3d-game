@@ -15,8 +15,7 @@ typedef enum {
     ITEM_LADDER, // FIXME: Ladder is no longer an item but keep for now to offset correctly
     ITEM_AXE,
     ITEM_TORCH,
-    ITEM_FAKEKIT,
-    ITEM_GOAL
+    ITEM_FAKEKIT
 } ItemType;
 
 typedef struct {
