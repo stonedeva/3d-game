@@ -18,12 +18,13 @@
 
 int tick_count = 0;
 int pixels[SCREEN_WIDTH * SCREEN_HEIGHT];
-int game_timer = 20*60;
+
+int g_game_timer = 20*60;
+GameState g_game_state = STATE_MENU;
 
 // Forward declaration
 Player player;
 Screen screen;
-GameState game_state = STATE_MENU;
 
 SDL_Window* window;
 SDL_Renderer* renderer;
@@ -32,7 +33,7 @@ SDL_Texture* texture;
 
 void update(float delta_time)
 {
-    if (game_state == STATE_INGAME) {
+    if (g_game_state == STATE_INGAME) {
 	map_update(delta_time);
 	player_update(&player);
 	ladders_update(&player);
@@ -43,7 +44,7 @@ void update(float delta_time)
 
 void render(SDL_Renderer* renderer, SDL_Texture* texture)
 {
-    switch (game_state) {
+    switch (g_game_state) {
     case STATE_MENU:
     case STATE_PAUSE:
     case STATE_VICTORY:
@@ -79,8 +80,8 @@ void main_loop(void)
 		running = 0;
 		return;
 	    }
-	    if (ev.key.keysym.sym == SDLK_ESCAPE && game_state == STATE_INGAME) {
-		game_state = STATE_PAUSE;
+	    if (ev.key.keysym.sym == SDLK_ESCAPE && g_game_state == STATE_INGAME) {
+		g_game_state = STATE_PAUSE;
 	    }
 	    menu_handle_input(&ev);
 	}
@@ -99,11 +100,11 @@ void main_loop(void)
 	frames++;
 
 	if (SDL_GetTicks() - timer >= 1000) {
-	    if (game_timer == 0) {
+	    if (g_game_timer == 0) {
 		player_game_over(&player);
 	    }
-	    if (game_state == STATE_INGAME) {
-		game_timer--;
+	    if (g_game_state == STATE_INGAME) {
+		g_game_timer--;
 	    }
 
 	    char win_title[29];
@@ -159,7 +160,7 @@ void quit(void)
 
 void game_reset(void)
 {
-    game_state = STATE_INGAME;
+    g_game_state = STATE_INGAME;
     player = player_init();
     map_switch(&player, MAP_CAVE);
 }

@@ -43,9 +43,10 @@ typedef struct {
     int y;
 } MapCoords;
 
-extern MapType current_map_type;
-extern Tile map[MAP_WIDTH][MAP_HEIGHT];
-extern bool is_ghost_stones_active;
+extern MapType g_current_map_type;
+extern Tile g_map[MAP_WIDTH][MAP_HEIGHT];
+extern bool g_is_ghost_stones_active;
+
 
 void map_load_from_file(char* file_path);
 void map_load_from_png(char* file_path);

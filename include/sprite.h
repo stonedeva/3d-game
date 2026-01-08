@@ -23,8 +23,8 @@ typedef struct {
     int sprite_count;
 } SpriteManager;
 
-extern Sprite sprites[SPRITE_CAP];
-extern int sprite_count;
+extern Sprite g_sprites[SPRITE_CAP];
+extern int g_sprite_count;
 
 
 Sprite sprite_load_from_path(char* file_path, double x, double y, int udiv, int vdiv, float vmove);

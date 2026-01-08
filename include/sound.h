@@ -22,7 +22,7 @@ typedef enum {
     SOUND_COUNT
 } Sound;
 
-extern Mix_Chunk* sounds[SOUND_COUNT];
+extern Mix_Chunk* g_sounds[SOUND_COUNT];
 
 
 void sound_init();

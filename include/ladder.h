@@ -17,8 +17,8 @@ typedef struct {
     Sprite sprite;
 } Ladder;
 
-extern Ladder ladders[LADDER_CAP];
-extern int ladder_count;
+extern Ladder g_ladders[LADDER_CAP];
+extern int g_ladder_count;
 
 void ladders_init(Bitmap* bitmap);
 void ladder_create(MapType map1, MapType map2, Bitmap* bitmap, double x, double y);

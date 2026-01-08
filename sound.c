@@ -2,7 +2,7 @@
 #include <SDL2/SDL.h>
 
 
-Mix_Chunk* sounds[SOUND_COUNT] = {0};
+Mix_Chunk* g_sounds[SOUND_COUNT] = {0};
 
 void sound_init()
 {
@@ -40,7 +40,7 @@ void sound_load(Sound sound_id, char* file_path)
 	SDL_Quit();
 	exit(1);
     }
-    sounds[sound_id] = sound;
+    g_sounds[sound_id] = sound;
 }
 
 void sound_play(Sound sound_id)
@@ -48,7 +48,7 @@ void sound_play(Sound sound_id)
     if (sound_id < 0 || sound_id > SOUND_COUNT)
 	return;
 
-    int channel = Mix_PlayChannel(-1, sounds[sound_id], 0);
+    int channel = Mix_PlayChannel(-1, g_sounds[sound_id], 0);
     if (channel < 0) {
 	fprintf(stderr, "ERROR: MixPlayChannel(): Failed to play sound: %s\n",
 		Mix_GetError());
@@ -58,7 +58,7 @@ void sound_play(Sound sound_id)
 void sound_cleanup()
 {
     for (int i = 0; i < SOUND_COUNT; i++) {
-	Mix_FreeChunk(sounds[i]);
+	Mix_FreeChunk(g_sounds[i]);
     }
     Mix_CloseAudio();
     Mix_Quit();

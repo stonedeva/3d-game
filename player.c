@@ -26,20 +26,20 @@ Player player_init()
 
 bool player_check_victory(Player* p)
 {
-    return current_map_type == MAP_OVERWORLD && p->pos.y >= 30;
+    return g_current_map_type == MAP_OVERWORLD && p->pos.y >= 30;
 }
 
 void player_forward(Player* p)
 {
     int px0 = (int)(p->pos.x + p->dir.x * PLAYER_SPEED);
     int py0 = (int)p->pos.y;
-    if (map[px0][py0] == TILE_EMPTY || map[px0][py0] == TILE_MAGIC_STONE ||
-	map[px0][py0] == TILE_GHOST_STONE) 
+    if (g_map[px0][py0] == TILE_EMPTY || g_map[px0][py0] == TILE_MAGIC_STONE ||
+	g_map[px0][py0] == TILE_GHOST_STONE) 
 	p->pos.x += p->dir.x * PLAYER_SPEED;
     int px1 = (int)p->pos.x;
     int py1 = (int)(p->pos.y + p->dir.y * PLAYER_SPEED);
-    if (map[px1][py1] == TILE_EMPTY || map[px1][py1] == TILE_MAGIC_STONE ||
-	map[px1][py1] == TILE_GHOST_STONE) 
+    if (g_map[px1][py1] == TILE_EMPTY || g_map[px1][py1] == TILE_MAGIC_STONE ||
+	g_map[px1][py1] == TILE_GHOST_STONE) 
 	p->pos.y += p->dir.y * PLAYER_SPEED;
 }
 
@@ -47,13 +47,13 @@ void player_backward(Player* p)
 {
     int px0 = (int)(p->pos.x - p->dir.x * PLAYER_SPEED);
     int py0 = (int)p->pos.y;
-    if (map[px0][py0] == TILE_EMPTY || map[px0][py0] == TILE_MAGIC_STONE ||
-	map[px0][py0] == TILE_GHOST_STONE)
+    if (g_map[px0][py0] == TILE_EMPTY || g_map[px0][py0] == TILE_MAGIC_STONE ||
+	g_map[px0][py0] == TILE_GHOST_STONE)
 	p->pos.x -= p->dir.x * PLAYER_SPEED;
     int px1 = (int)p->pos.x;
     int py1 = (int)(p->pos.y - p->dir.y * PLAYER_SPEED);
-    if (map[px1][py1] == TILE_EMPTY || map[px1][py1] == TILE_MAGIC_STONE ||
-	map[px1][py1] == TILE_GHOST_STONE)
+    if (g_map[px1][py1] == TILE_EMPTY || g_map[px1][py1] == TILE_MAGIC_STONE ||
+	g_map[px1][py1] == TILE_GHOST_STONE)
 	p->pos.y -= p->dir.y * PLAYER_SPEED;
 }
 
@@ -74,7 +74,7 @@ void player_rotate(Player* p, int dir)
 
 void player_interact_block(Player* p, int map_x, int map_y)
 {
-    Tile tile = map[map_x][map_y];
+    Tile tile = g_map[map_x][map_y];
     switch (tile) {
     case TILE_LIGHT_BREAKSTONE0:
     case TILE_LIGHT_BREAKSTONE1:
@@ -85,7 +85,7 @@ void player_interact_block(Player* p, int map_x, int map_y)
 	break;
     case TILE_ICE_LIGHT_BREAKSTONE:
 	if (p->has_axe) {
-	    map[map_x][map_y] = 0;
+	    g_map[map_x][map_y] = 0;
 	    sound_play(SOUND_WALL_DESTROY);
 	} else {
 	    sound_play(SOUND_WRONG);
@@ -93,7 +93,7 @@ void player_interact_block(Player* p, int map_x, int map_y)
 	break;
     case TILE_DOOR:
 	if (p->keys > 0) {
-	    map[map_x][map_y] = 0;
+	    g_map[map_x][map_y] = 0;
 	    p->keys--;
 	    sound_play(SOUND_DOOR_OPEN);
 	} else {
@@ -119,61 +119,57 @@ bool player_check_collision(Player* p, Sprite* sprite, double radius)
 
 void player_game_over(Player* p)
 {
-    game_state = STATE_GAMEOVER;
+    g_game_state = STATE_GAMEOVER;
     sound_play(SOUND_VICTORY);
 
-    game_timer = -1; /* Sound mehrfach abspielen vermeiden */
+    g_game_timer = -1; /* Sound mehrfach abspielen vermeiden */
 }
 
 void player_victory(Player* p)
 {
-    game_state = STATE_VICTORY;
+    g_game_state = STATE_VICTORY;
     sound_play(SOUND_GAMEOVER);
 }
 
 void player_pickup_item(Player* p, int item_index)
 {
-    if (item_index >= item_count) {
+    if (item_index >= g_item_count) {
 	return;
     }
-    if (items[item_index].map != current_map_type) {
+    if (g_items[item_index].map != g_current_map_type) {
 	return;
     }
 
-    switch (items[item_index].type) {
+    switch (g_items[item_index].type) {
     case ITEM_KEY:
 	p->keys++;
 	sound_play(SOUND_PICKUP_KEY);
-	items[item_index] = (Item) {.type = ITEM_EMPTY};
 	break;
     case ITEM_TIMEKIT:
-	game_timer += 60;
+	g_game_timer += 60;
 	sound_play(SOUND_TIMEKIT);
-	items[item_index] = (Item) {.type = ITEM_EMPTY};
 	break;
     case ITEM_AXE:
 	p->has_axe = 1;
-	items[item_index] = (Item) {.type = ITEM_EMPTY};
 	break;
     case ITEM_TORCH:
 	p->has_torch = 1;
-	items[item_index] = (Item) {.type = ITEM_EMPTY};
 	break;
     case ITEM_FAKEKIT:
-	if (game_timer < 30)
+	if (g_game_timer < 30)
 	    break;
-	game_timer -= (int)(game_timer / 4);
-	items[item_index] = (Item) {.type = ITEM_EMPTY};
+	g_game_timer -= (int)(g_game_timer / 4);
 	sound_play(SOUND_WRONG);
 	break;
     default:
 	break;
     }
+    g_items[item_index] = (Item) {.type = ITEM_EMPTY};
 }
 
 void player_update(Player* p)
 {
-    if (map[(int)p->pos.x][(int)p->pos.y] == TILE_GHOST_STONE && is_ghost_stones_active) {
+    if (g_map[(int)p->pos.x][(int)p->pos.y] == TILE_GHOST_STONE && g_is_ghost_stones_active) {
 	player_game_over(p);
     }
     player_handle_input(p);

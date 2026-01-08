@@ -25,8 +25,8 @@ typedef struct {
 } Item;
 
 
-extern Item items[ITEM_CAP];
-extern int item_count;
+extern Item g_items[ITEM_CAP];
+extern int g_item_count;
 
 void item_load(ItemType type, Bitmap* bitmap, MapType map, double x, double y);
 void item_load_with_scale(ItemType type, Bitmap* bitmap, MapType map, double x, double y,

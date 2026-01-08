@@ -9,8 +9,8 @@ typedef enum {
     STATE_GAMEOVER,
 } GameState;
 
-extern GameState game_state;
-extern int game_timer;
+extern GameState g_game_state;
+extern int g_game_timer;
 
 void game_reset(void);
 

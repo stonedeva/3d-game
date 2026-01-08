@@ -22,7 +22,7 @@ typedef struct {
     int side;
 } Ray;
 
-extern double zbuffer[SCREEN_WIDTH];
+extern double g_zbuffer[SCREEN_WIDTH];
 
 
 Screen screen_init(int* pixels);

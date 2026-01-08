@@ -1,8 +1,8 @@
 #include "./item.h"
 #include "./vec2.h"
 
-Item items[ITEM_CAP] = {0};
-int item_count = 0;
+Item g_items[ITEM_CAP] = {0};
+int g_item_count = 0;
 
 
 void item_load(ItemType type, Bitmap* bitmap, MapType map, double x, double y)
@@ -12,7 +12,7 @@ void item_load(ItemType type, Bitmap* bitmap, MapType map, double x, double y)
     i.map = map;
     i.type = type;
     i.sprite = sprite_load_from_bitmap(bitmap, bitmap_id, x, y, 2, 2, SPRITE_GROUND_VALUE);
-    items[item_count++] = i;
+    g_items[g_item_count++] = i;
 }
 
 void item_load_with_scale(ItemType type, Bitmap* bitmap, MapType map, double x, double y,
@@ -23,7 +23,7 @@ void item_load_with_scale(ItemType type, Bitmap* bitmap, MapType map, double x, 
     i.map = map;
     i.type = type;
     i.sprite = sprite_load_from_bitmap(bitmap, bitmap_id, x, y, udiv, vdiv, vmove);
-    items[item_count++] = i;
+    g_items[g_item_count++] = i;
 }
 
 void items_init(Bitmap* bitmap)
@@ -53,11 +53,11 @@ void items_init(Bitmap* bitmap)
 
 void items_update(Player* p)
 {
-    for (int i = 0; i < item_count; i++) {
-	if (items[i].type == ITEM_EMPTY) {
+    for (int i = 0; i < g_item_count; i++) {
+	if (g_items[i].type == ITEM_EMPTY) {
 	    continue;
 	}
-	if (player_check_collision(p, &items[i].sprite, 0.5f)) {
+	if (player_check_collision(p, &g_items[i].sprite, 0.5f)) {
 	    player_pickup_item(p, i);
 	}
     }
@@ -65,10 +65,10 @@ void items_update(Player* p)
 
 void items_render(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
 {
-    for (int i = 0; i < item_count; i++) {
-	if (items[i].type == ITEM_EMPTY || current_map_type != items[i].map) {
+    for (int i = 0; i < g_item_count; i++) {
+	if (g_items[i].type == ITEM_EMPTY || g_current_map_type != g_items[i].map) {
 	    continue;
 	}
-	sprite_render(screen, &items[i].sprite, dir, plane, pos);
+	sprite_render(screen, &g_items[i].sprite, dir, plane, pos);
     }
 }

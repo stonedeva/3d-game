@@ -15,7 +15,7 @@
 #include <time.h>
 
 
-double zbuffer[SCREEN_WIDTH] = {0};
+double g_zbuffer[SCREEN_WIDTH] = {0};
 void screen_generate_overworld_floor();
 
 Screen screen_init(int* pixels)
@@ -82,7 +82,7 @@ void screen_render_floor(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
 	    // Floor
 	    int bm_floor_index = 0;
 	    int bm_celling_index = 0;
-	    switch (current_map_type) {
+	    switch (g_current_map_type) {
 	    case MAP_CAVE:
 		bm_floor_index = 0;
 		break;
@@ -101,7 +101,7 @@ void screen_render_floor(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
 		break;
 	    }
 	    bm_celling_index = bm_floor_index;
-	    if (map[cell_x % MAP_WIDTH][cell_y % MAP_HEIGHT] == TILE_GHOST_STONE) {
+	    if (g_map[cell_x % MAP_WIDTH][cell_y % MAP_HEIGHT] == TILE_GHOST_STONE) {
 		bm_floor_index = TILE_GHOST_STONE;
 	    }
 
@@ -111,7 +111,7 @@ void screen_render_floor(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
 	    screen->pixels[y * SCREEN_WIDTH + x] = color;
 
 	    // Celling
-	    if (current_map_type == MAP_OVERWORLD) {
+	    if (g_current_map_type == MAP_OVERWORLD) {
 		screen->pixels[(SCREEN_HEIGHT - y - 1) * SCREEN_WIDTH + x] = 0;
 	    } else {
 		screen->pixels[(SCREEN_HEIGHT - y - 1) * SCREEN_WIDTH + x] = color;
@@ -167,8 +167,8 @@ void screen_perform_dda(Ray* ray, int* map_x, int* map_y, Vec2* pos)
 	    hit = 1;
 	}
 
-	if (map[*map_x][*map_y] > 0 &&
-	    (map[*map_x][*map_y] != TILE_GHOST_STONE || is_ghost_stones_active)) {
+	if (g_map[*map_x][*map_y] > 0 &&
+	    (g_map[*map_x][*map_y] != TILE_GHOST_STONE || g_is_ghost_stones_active)) {
 	    hit = 1;
 	    break;
 	}
@@ -212,7 +212,7 @@ void screen_render_walls(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
 	double wall_x = 0;
 	screen_calculate_perp_wall_dist(&ray, pos, &wall_x);
 
-	int tex_num = map[map_x][map_y];
+	int tex_num = g_map[map_x][map_y];
 
 	int tex_x = (int)(wall_x * (double)TEX_WIDTH);
 	if (ray.side == 0 && ray_dir.x > 0) tex_x = TEX_WIDTH - tex_x - 1;
@@ -240,14 +240,14 @@ void screen_render_walls(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
 	    }
 	    screen->pixels[y * SCREEN_WIDTH + x] = color;
 	}
-	zbuffer[x] = ray.perp_wall_dist;
+	g_zbuffer[x] = ray.perp_wall_dist;
     }
 }
 
 void screen_render(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
 {
     screen_render_floor(screen, dir, plane, pos);
-    if (current_map_type != MAP_OVERWORLD)
+    if (g_current_map_type != MAP_OVERWORLD)
 	screen_render_walls(screen, dir, plane, pos);
     items_render(screen, dir, plane, pos);
     ladders_render(screen, dir, plane, pos);

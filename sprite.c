@@ -5,8 +5,8 @@
 #include <SDL2/SDL_image.h>
 
 
-Sprite sprites[SPRITE_CAP] = {0};
-int sprite_count = 0;
+Sprite g_sprites[SPRITE_CAP] = {0};
+int g_sprite_count = 0;
 
 Sprite sprite_load_from_path(char* file_path, double x, double y, 
 			     int udiv, int vdiv, float vmove)
@@ -93,7 +93,7 @@ void sprite_render(Screen* screen, Sprite* sprite, Vec2* dir, Vec2* plane, Vec2*
 	int texX = (int)(256 * (x - (-sp_width / 2 + sp_screen_x)) * TEX_WIDTH / sp_width) / 256;
 	if (transf_y > 0 && x > 0 
 	    && x < SCREEN_WIDTH 
-	    && transf_y < zbuffer[x])
+	    && transf_y < g_zbuffer[x])
 	for (int y = start_y; y < end_y; y++) {
 	    int d = (y - vmove_screen) * 256 - SCREEN_HEIGHT * 128 + sp_height * 128; 
 	    int texY = ((d * TEX_HEIGHT) / sp_height) / 256;
