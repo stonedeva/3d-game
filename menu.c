@@ -11,8 +11,10 @@ SDL_Color green = {0, 255, 0, 255};
 SDL_Color red = {255, 0, 0, 255};
 int selected = 0;
 
+static char game_name[64] = "The Maze";
+
 SDL_Color title_color;
-char title_str[64] = "The Maze";
+char title_str[64];
 
 char* options[OPT_COUNT] = {
     "Start",
@@ -22,6 +24,15 @@ char* options[OPT_COUNT] = {
 
 TTF_Font* font;
 
+void menu_set_default()
+{
+    strcpy(title_str, game_name);
+    title_color = white;
+    options[0] = "Start";
+    options[1] = "Control";
+    options[2] = "Quit";
+}
+
 void menu_init()
 {   
     font = TTF_OpenFont("./res/font.ttf", 16);
@@ -29,8 +40,11 @@ void menu_init()
 	fprintf(stderr, "ERROR: TTF_OpenFont(): %s\n", TTF_GetError());
 	exit(1);
     }
+    menu_set_default();
 }
 
+// FIXME: Neues Surface jedes Frame ist schlecht! Nur einmal als globale
+// Variable und dann aufrufen!
 void menu_render_text(SDL_Renderer* renderer, TTF_Font* font, SDL_Color color, 
 		      char* text, int x, int y, int w, int h)
 {
@@ -74,9 +88,10 @@ void menu_handle_input(SDL_Event* ev)
 	case SDL_SCANCODE_RETURN:
 	    sound_play(SOUND_MENU_SELECT);
 	    if (selected == OPT_START) {
-		if (game_state != STATE_GAMEOVER || game_state != STATE_VICTORY) {
+		if (game_state != STATE_GAMEOVER && game_state != STATE_VICTORY) {
 		    game_state = STATE_INGAME;
 		} else {
+		    menu_set_default();
 		    game_reset();
 		}
 		break;
@@ -96,7 +111,7 @@ void menu_render(SDL_Renderer* renderer)
 {
     switch (game_state) {
     case STATE_MENU:
-	strcpy(title_str, "The Maze");
+	strcpy(title_str, game_name);
 	title_color = white;
 	break;
     case STATE_PAUSE:

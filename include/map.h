@@ -5,7 +5,7 @@
 
 #define MAP_WIDTH 24
 #define MAP_HEIGHT 24
-#define SECRET_PLATE_CAP 5
+#define GHOST_STONE_CAP 5
 
 typedef enum {
     TILE_EMPTY = 0,
@@ -27,7 +27,7 @@ typedef enum {
     TILE_FIRE_LIGHT_BREAKSTONE,
     TILE_OVERWORLD_GRASS_GROUND,
     TILE_OVERWORLD_DIRT_GROUND,
-    TILE_SECRET_PLATE,
+    TILE_GHOST_STONE,
     TILE_COUNT
 } Tile;
 
@@ -45,7 +45,7 @@ typedef struct {
 
 extern MapType current_map_type;
 extern Tile map[MAP_WIDTH][MAP_HEIGHT];
-extern bool is_plates_active;
+extern bool is_ghost_stones_active;
 
 void map_load_from_file(char* file_path);
 void map_load_from_png(char* file_path);

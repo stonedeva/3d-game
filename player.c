@@ -34,12 +34,12 @@ void player_forward(Player* p)
     int px0 = (int)(p->pos.x + p->dir.x * PLAYER_SPEED);
     int py0 = (int)p->pos.y;
     if (map[px0][py0] == TILE_EMPTY || map[px0][py0] == TILE_MAGIC_STONE ||
-	map[px0][py0] == TILE_SECRET_PLATE) 
+	map[px0][py0] == TILE_GHOST_STONE) 
 	p->pos.x += p->dir.x * PLAYER_SPEED;
     int px1 = (int)p->pos.x;
     int py1 = (int)(p->pos.y + p->dir.y * PLAYER_SPEED);
     if (map[px1][py1] == TILE_EMPTY || map[px1][py1] == TILE_MAGIC_STONE ||
-	map[px1][py1] == TILE_SECRET_PLATE) 
+	map[px1][py1] == TILE_GHOST_STONE) 
 	p->pos.y += p->dir.y * PLAYER_SPEED;
 }
 
@@ -48,12 +48,12 @@ void player_backward(Player* p)
     int px0 = (int)(p->pos.x - p->dir.x * PLAYER_SPEED);
     int py0 = (int)p->pos.y;
     if (map[px0][py0] == TILE_EMPTY || map[px0][py0] == TILE_MAGIC_STONE ||
-	map[px0][py0] == TILE_SECRET_PLATE)
+	map[px0][py0] == TILE_GHOST_STONE)
 	p->pos.x -= p->dir.x * PLAYER_SPEED;
     int px1 = (int)p->pos.x;
     int py1 = (int)(p->pos.y - p->dir.y * PLAYER_SPEED);
     if (map[px1][py1] == TILE_EMPTY || map[px1][py1] == TILE_MAGIC_STONE ||
-	map[px1][py1] == TILE_SECRET_PLATE)
+	map[px1][py1] == TILE_GHOST_STONE)
 	p->pos.y -= p->dir.y * PLAYER_SPEED;
 }
 
@@ -122,7 +122,7 @@ void player_game_over(Player* p)
     game_state = STATE_GAMEOVER;
     sound_play(SOUND_VICTORY);
 
-    game_timer = -1; /* To avoid sound play multiple times */
+    game_timer = -1; /* Sound mehrfach abspielen vermeiden */
 }
 
 void player_victory(Player* p)
@@ -173,7 +173,7 @@ void player_pickup_item(Player* p, int item_index)
 
 void player_update(Player* p)
 {
-    if (map[(int)p->pos.x][(int)p->pos.y] == TILE_SECRET_PLATE && is_plates_active) {
+    if (map[(int)p->pos.x][(int)p->pos.y] == TILE_GHOST_STONE && is_ghost_stones_active) {
 	player_game_over(p);
     }
     player_handle_input(p);

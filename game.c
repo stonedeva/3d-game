@@ -15,9 +15,6 @@
 #include "./menu.h"
 #include "./ladder.h"
 
-#ifdef TARGET_BROWSER
-#include <emscripten/emscripten.h>
-#endif // TARGET_BROWSER
 
 int tick_count = 0;
 int pixels[SCREEN_WIDTH * SCREEN_HEIGHT];
@@ -55,6 +52,7 @@ void render(SDL_Renderer* renderer, SDL_Texture* texture)
 	break;
     case STATE_INGAME:
 	screen_render(&screen, &player.dir, &player.plane, &player.pos);
+
 	SDL_UpdateTexture(texture, 0, pixels, SCREEN_WIDTH * sizeof(int));
 	SDL_RenderCopy(renderer, texture, 0, 0);
 	break;
@@ -162,8 +160,8 @@ void quit(void)
 void game_reset(void)
 {
     game_state = STATE_INGAME;
-    current_map_type = MAP_CAVE;
     player = player_init();
+    map_switch(&player, MAP_CAVE);
 }
 
 int init(void)

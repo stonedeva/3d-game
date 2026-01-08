@@ -101,8 +101,8 @@ void screen_render_floor(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
 		break;
 	    }
 	    bm_celling_index = bm_floor_index;
-	    if (map[cell_x % MAP_WIDTH][cell_y % MAP_HEIGHT] == TILE_SECRET_PLATE) {
-		bm_floor_index = TILE_SECRET_PLATE;
+	    if (map[cell_x % MAP_WIDTH][cell_y % MAP_HEIGHT] == TILE_GHOST_STONE) {
+		bm_floor_index = TILE_GHOST_STONE;
 	    }
 
 	    // Floor
@@ -168,7 +168,7 @@ void screen_perform_dda(Ray* ray, int* map_x, int* map_y, Vec2* pos)
 	}
 
 	if (map[*map_x][*map_y] > 0 &&
-	    (map[*map_x][*map_y] != TILE_SECRET_PLATE || is_plates_active)) {
+	    (map[*map_x][*map_y] != TILE_GHOST_STONE || is_ghost_stones_active)) {
 	    hit = 1;
 	    break;
 	}
@@ -219,7 +219,7 @@ void screen_render_walls(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
 	if (ray.side == 1 && ray_dir.y < 0) tex_x = TEX_HEIGHT - tex_x - 1;
 
 	int line_height = (int) (SCREEN_HEIGHT / ray.perp_wall_dist);
-	int draw_start = -line_height / 2 + SCREEN_HEIGHT / 2;
+	int draw_start = -line_height / 2 + SCREEN_HEIGHT / 2;	
 	if (draw_start < 0) {
 	    draw_start = 0;
 	}
