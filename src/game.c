@@ -117,7 +117,7 @@ void main_loop(void)
 	    timer += 1000;
 	}
 
-	SDL_Delay(1000 / TARGET_FPS);
+    	SDL_Delay(1000 / TARGET_FPS);
     }
 }
 
@@ -213,7 +213,8 @@ int init(void)
     items_init(&screen.bitmap);
     ladders_init(&screen.bitmap);
 
-    map_load_from_png("./res/maps/cave.png");
+    maps_load_from_folder();
+    map_switch(&player, MAP_CAVE);
 
     main_loop();
 

@@ -1,3 +1,0 @@
-- Make only 1 render iteration for performance
-- GUI
-- More performance (higher FPS)

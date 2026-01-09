@@ -8,7 +8,6 @@
 #include <SDL2/SDL.h>
 #include <assert.h>
 
-#define TESTING_MODE
 
 Player player_init()
 {
@@ -33,13 +32,13 @@ void player_forward(Player* p)
 {
     int px0 = (int)(p->pos.x + p->dir.x * PLAYER_SPEED);
     int py0 = (int)p->pos.y;
-    if (g_map[px0][py0] == TILE_EMPTY || g_map[px0][py0] == TILE_MAGIC_STONE ||
-	g_map[px0][py0] == TILE_GHOST_STONE) 
+    if (map_get(px0, py0) == TILE_EMPTY || map_get(px0, py0) == TILE_MAGIC_STONE ||
+	map_get(px0, py0) == TILE_GHOST_STONE) 
 	p->pos.x += p->dir.x * PLAYER_SPEED;
     int px1 = (int)p->pos.x;
     int py1 = (int)(p->pos.y + p->dir.y * PLAYER_SPEED);
-    if (g_map[px1][py1] == TILE_EMPTY || g_map[px1][py1] == TILE_MAGIC_STONE ||
-	g_map[px1][py1] == TILE_GHOST_STONE) 
+    if (map_get(px1, py1) == TILE_EMPTY || map_get(px1, py1) == TILE_MAGIC_STONE ||
+	map_get(px1, py1) == TILE_GHOST_STONE) 
 	p->pos.y += p->dir.y * PLAYER_SPEED;
 }
 
@@ -47,13 +46,13 @@ void player_backward(Player* p)
 {
     int px0 = (int)(p->pos.x - p->dir.x * PLAYER_SPEED);
     int py0 = (int)p->pos.y;
-    if (g_map[px0][py0] == TILE_EMPTY || g_map[px0][py0] == TILE_MAGIC_STONE ||
-	g_map[px0][py0] == TILE_GHOST_STONE)
+    if (map_get(px0, py0) == TILE_EMPTY || map_get(px0, py0) == TILE_MAGIC_STONE ||
+	map_get(px0, py0) == TILE_GHOST_STONE)
 	p->pos.x -= p->dir.x * PLAYER_SPEED;
     int px1 = (int)p->pos.x;
     int py1 = (int)(p->pos.y - p->dir.y * PLAYER_SPEED);
-    if (g_map[px1][py1] == TILE_EMPTY || g_map[px1][py1] == TILE_MAGIC_STONE ||
-	g_map[px1][py1] == TILE_GHOST_STONE)
+    if (map_get(px1, py1) == TILE_EMPTY || map_get(px1, py1) == TILE_MAGIC_STONE ||
+	map_get(px1, py1) == TILE_GHOST_STONE)
 	p->pos.y -= p->dir.y * PLAYER_SPEED;
 }
 
@@ -74,7 +73,7 @@ void player_rotate(Player* p, int dir)
 
 void player_interact_block(Player* p, int map_x, int map_y)
 {
-    Tile tile = g_map[map_x][map_y];
+    Tile tile = map_get(map_x, map_y);
     switch (tile) {
     case TILE_LIGHT_BREAKSTONE0:
     case TILE_LIGHT_BREAKSTONE1:
@@ -85,7 +84,7 @@ void player_interact_block(Player* p, int map_x, int map_y)
 	break;
     case TILE_ICE_LIGHT_BREAKSTONE:
 	if (p->has_axe) {
-	    g_map[map_x][map_y] = 0;
+	    map_set(TILE_EMPTY, map_x, map_y);
 	    sound_play(SOUND_WALL_DESTROY);
 	} else {
 	    sound_play(SOUND_WRONG);
@@ -93,7 +92,7 @@ void player_interact_block(Player* p, int map_x, int map_y)
 	break;
     case TILE_DOOR:
 	if (p->keys > 0) {
-	    g_map[map_x][map_y] = 0;
+	    map_set(TILE_EMPTY, map_x, map_y);
 	    p->keys--;
 	    sound_play(SOUND_DOOR_OPEN);
 	} else {
@@ -169,7 +168,8 @@ void player_pickup_item(Player* p, int item_index)
 
 void player_update(Player* p)
 {
-    if (g_map[(int)p->pos.x][(int)p->pos.y] == TILE_GHOST_STONE && g_is_ghost_stones_active) {
+    if (map_get((int)p->pos.x, (int)p->pos.y) == TILE_GHOST_STONE 
+	&& g_is_ghost_stones_active) {
 	player_game_over(p);
     }
     player_handle_input(p);

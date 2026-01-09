@@ -35,7 +35,8 @@ typedef enum {
     MAP_CAVE,
     MAP_ICE,
     MAP_FIRE,
-    MAP_OVERWORLD
+    MAP_OVERWORLD,
+    MAP_COUNT
 } MapType;
 
 typedef struct {
@@ -44,15 +45,17 @@ typedef struct {
 } MapCoords;
 
 extern MapType g_current_map_type;
-extern Tile g_map[MAP_WIDTH][MAP_HEIGHT];
+extern Tile g_maps[MAP_WIDTH][MAP_HEIGHT][MAP_COUNT];
 extern bool g_is_ghost_stones_active;
 
 
-void map_load_from_file(char* file_path);
-void map_load_from_png(char* file_path);
+Tile map_get(int map_x, int map_y);
+void map_set(Tile tile, int map_x, int map_y);
+
+void maps_load_from_folder();
+void map_load_from_png(MapType id, char* file_path);
 void map_switch(Player* p, MapType type);
 void map_load_from_file(char* file_path);
-void map_load_from_png(char* file_path);
 void map_break_block(int map_x, int map_y, Tile end_tile);
 void map_explode_block(int map_x, int map_y);
 void map_dump();

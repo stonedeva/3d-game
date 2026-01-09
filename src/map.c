@@ -12,7 +12,7 @@
 
 
 MapType g_current_map_type = MAP_CAVE;
-Tile g_map[MAP_WIDTH][MAP_HEIGHT] = {0};
+Tile g_maps[MAP_WIDTH][MAP_HEIGHT][MAP_COUNT] = {0};
 bool g_is_ghost_stones_active = 0;
 
 MapCoords ghost_stones[GHOST_STONE_CAP] = {0};
@@ -32,26 +32,29 @@ int map_colors[TILE_COUNT] = {
     [TILE_GHOST_STONE] = 0xffffdc00
 };
 
+Tile map_get(int map_x, int map_y)
+{
+    assert(g_current_map_type <= MAP_COUNT);
+    return g_maps[map_x][map_y][g_current_map_type];
+}
+
+void map_set(Tile tile, int map_x, int map_y)
+{
+    assert(g_current_map_type <= MAP_COUNT);
+    g_maps[map_x][map_y][g_current_map_type] = tile;
+}
+
+void maps_load_from_folder()
+{
+    map_load_from_png(MAP_CAVE, "./res/maps/cave.png");
+    map_load_from_png(MAP_ICE, "./res/maps/ice.png");
+    map_load_from_png(MAP_FIRE, "./res/maps/fire.png");
+}
+
 void map_switch(Player* p, MapType type)
 {
     g_current_map_type = type;
-
     p->pos.y += 0.5f;
-
-    switch (type) {
-    case MAP_CAVE:
-	map_load_from_png("./res/maps/cave.png");
-	break;
-    case MAP_ICE:
-	map_load_from_png("./res/maps/ice.png");
-	break;
-    case MAP_FIRE:
-	map_load_from_png("./res/maps/fire.png");
-	break;
-    case MAP_OVERWORLD:
-	memset(g_map, 0, sizeof(Tile)*MAP_WIDTH*MAP_HEIGHT);
-	break;
-    }
     sound_play(SOUND_LEVEL_ENTRANCE);
     SDL_Delay(250);
 }
@@ -67,26 +70,7 @@ void map_update(float delta_time)
     }
 }
 
-void map_load_from_file(char* file_path)
-{
-    FILE* fp = fopen(file_path, "rb");
-    if (!fp) {
-	fprintf(stderr, "ERROR: fopen(): Failed to open map file: %s\n",
-		strerror(errno));
-	exit(1);
-    }
-
-    size_t n = fread(g_map, 1, MAP_WIDTH*MAP_HEIGHT, fp);
-    if (n != MAP_WIDTH*MAP_HEIGHT) {
-	fprintf(stderr, "ERROR: fread(): Expected %d bytes read %zu bytes: %s\n",
-		MAP_WIDTH*MAP_HEIGHT, n, strerror(errno));
-	exit(1);
-    }
-
-    fclose(fp);
-}
-
-void map_load_from_png(char* file_path)
+void map_load_from_png(MapType id, char* file_path)
 {
     SDL_Surface* surface = IMG_Load(file_path);
     if (!surface) {
@@ -111,14 +95,14 @@ void map_load_from_png(char* file_path)
 
 	    for (int i = 0; i < TILE_COUNT; i++) {
 		if (map_colors[i] == color) {
-		    g_map[x][y] = i;
+		    g_maps[x][y][id] = i;
 		    if (i == TILE_GHOST_STONE && ghost_stone_count < GHOST_STONE_CAP) {
 			ghost_stones[ghost_stone_count++] = (MapCoords){x,y};
 		    }
 		    break;
 		} else {
 		    // Wichtig, damit nicht Blöcke von vorherigen Level gerendert werden
-		    g_map[x][y] = 0;
+		    g_maps[x][y][id] = 0;
 		}
 	    }
         }
@@ -128,27 +112,27 @@ void map_load_from_png(char* file_path)
 
 void map_break_block(int map_x, int map_y, Tile last_tile)
 {
-    Tile tile = g_map[map_x][map_y];
+    Tile tile = map_get(map_x, map_y);
     if (tile != last_tile) {
-	g_map[map_x][map_y] = tile + 1;
+	map_set(tile+1, map_x, map_y);
     } else {
-	g_map[map_x][map_y] = TILE_EMPTY;
+	map_set(TILE_EMPTY, map_x, map_y);
 	sound_play(SOUND_WALL_DESTROY);
     }
 }
 
 void map_explode_block(int map_x, int map_y)
 {
-    assert(g_map[map_x][map_y] == TILE_FIRE_LIGHT_BREAKSTONE && 
+    assert(map_get(map_x, map_y) == TILE_FIRE_LIGHT_BREAKSTONE && 
 	   "map_explode_block(): Expected TILE_FIRE_LIGHT_BREAKSTONE!\n");
 
-    g_map[map_x][map_y] = TILE_EMPTY;
+    map_set(TILE_EMPTY, map_x, map_y);
     sound_play(SOUND_EXPLOSION);
 
-    g_map[map_x][map_y+1] = TILE_EMPTY;
-    g_map[map_x][map_y-1] = TILE_EMPTY;
-    g_map[map_x+1][map_y] = TILE_EMPTY;
-    g_map[map_x-1][map_y] = TILE_EMPTY;
+    map_set(TILE_EMPTY, map_x, map_y+1);
+    map_set(TILE_EMPTY, map_x, map_y-1);
+    map_set(TILE_EMPTY, map_x+1, map_y);
+    map_set(TILE_EMPTY, map_x-1, map_y);
 }
 
 void map_dump()
@@ -156,7 +140,7 @@ void map_dump()
     for (int x = 0; x < MAP_WIDTH; x++) {
 	printf("{");
 	for (int y = 0; y < MAP_HEIGHT; y++) {
-	    printf("%d, ", g_map[x][y]);
+	    printf("%d, ", map_get(x, y));
 	}
 	printf("}\n");
     }
