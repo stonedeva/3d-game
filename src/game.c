@@ -160,6 +160,7 @@ void quit(void)
 
 void game_reset(void)
 {
+    maps_load_from_folder();
     g_game_state = STATE_INGAME;
     player = player_init();
     map_switch(&player, MAP_CAVE);

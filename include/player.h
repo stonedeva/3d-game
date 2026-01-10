@@ -16,6 +16,7 @@ typedef struct {
     int keys;
     bool has_axe;
     bool has_torch;
+    bool is_moving;
     Vec2 dir;
     Vec2 plane;
     Vec2 pos;

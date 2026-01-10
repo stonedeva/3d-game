@@ -37,7 +37,7 @@ void screen_generate_overworld_floor()
     for (int x = 0; x < MAP_WIDTH; x++) {
 	for (int y = 0; y < MAP_HEIGHT; y++) {
 	    double r = (double)rand() / (double)RAND_MAX; // 0 - 1, 0% - 100%
-	    if (r < 0.2) {
+	    if (r < 0.4) {
 		overworld_floor_map[x][y] = 1;
 	    } else {
 		overworld_floor_map[x][y] = 0;

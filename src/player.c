@@ -8,6 +8,8 @@
 #include <SDL2/SDL.h>
 #include <assert.h>
 
+#define TESTING_MODE
+
 
 Player player_init()
 {
@@ -23,13 +25,9 @@ Player player_init()
     return p;
 }
 
-bool player_check_victory(Player* p)
-{
-    return g_current_map_type == MAP_OVERWORLD && p->pos.y >= 30;
-}
-
 void player_forward(Player* p)
 {
+    p->is_moving = 1;
     int px0 = (int)(p->pos.x + p->dir.x * PLAYER_SPEED);
     int py0 = (int)p->pos.y;
     if (map_get(px0, py0) == TILE_EMPTY || map_get(px0, py0) == TILE_MAGIC_STONE ||
@@ -44,6 +42,7 @@ void player_forward(Player* p)
 
 void player_backward(Player* p)
 {
+    p->is_moving = 1;
     int px0 = (int)(p->pos.x - p->dir.x * PLAYER_SPEED);
     int py0 = (int)p->pos.y;
     if (map_get(px0, py0) == TILE_EMPTY || map_get(px0, py0) == TILE_MAGIC_STONE ||
@@ -100,7 +99,11 @@ void player_interact_block(Player* p, int map_x, int map_y)
 	}
 	break;
     case TILE_FIRE_LIGHT_BREAKSTONE:
-	map_explode_block(map_x, map_y);
+	if (p->has_torch) {
+	    map_explode_block(map_x, map_y);
+	} else {
+	    sound_play(SOUND_WRONG);
+	}
 	break;
     default:
 	break;
@@ -111,15 +114,15 @@ bool player_check_collision(Player* p, Sprite* sprite, double radius)
 {
     double dx = p->pos.x - sprite->pos.x;
     double dy = p->pos.y - sprite->pos.y;
-    double dist = sqrt(dx*dx + dy*dy);
+    double dist = dx*dx + dy*dy;
 
-    return dist < radius;
+    return dist < radius * radius;
 }
 
 void player_game_over(Player* p)
 {
     g_game_state = STATE_GAMEOVER;
-    sound_play(SOUND_VICTORY);
+    sound_play(SOUND_GAMEOVER);
 
     g_game_timer = -1; /* Sound mehrfach abspielen vermeiden */
 }
@@ -127,7 +130,7 @@ void player_game_over(Player* p)
 void player_victory(Player* p)
 {
     g_game_state = STATE_VICTORY;
-    sound_play(SOUND_GAMEOVER);
+    sound_play(SOUND_VICTORY);
 }
 
 void player_pickup_item(Player* p, int item_index)
@@ -177,7 +180,7 @@ void player_update(Player* p)
 
 void player_handle_input(Player* p)
 {
-    uint8_t* keystate = SDL_GetKeyboardState(0);
+    const uint8_t* keystate = SDL_GetKeyboardState(0);
 
     if (keystate[SDL_SCANCODE_W]) {
 	player_forward(p);

@@ -36,12 +36,12 @@ void items_init(Bitmap* bitmap)
     // MAP_ICE
     item_load(ITEM_KEY, bitmap, MAP_ICE, 5.5f, 4.4f);
     item_load(ITEM_KEY, bitmap, MAP_ICE, 19.5f, 14.8f);
+    item_load(ITEM_KEY, bitmap, MAP_ICE, 16.5f, 1.6f);
     item_load(ITEM_AXE, bitmap, MAP_ICE, 1.8f, 21.5f);
     item_load(ITEM_TIMEKIT, bitmap, MAP_ICE, 1.4f, 12.4f);
 
     // MAP_FIRE
     item_load(ITEM_TORCH, bitmap, MAP_FIRE, 6.5f, 5.9f);
-    item_load(ITEM_KEY, bitmap, MAP_FIRE, 10.2f, 10.5f);
     item_load(ITEM_KEY, bitmap, MAP_FIRE, 1.5f, 22.3f);
     item_load(ITEM_KEY, bitmap, MAP_FIRE, 3.5f, 12.8f);
     item_load(ITEM_KEY, bitmap, MAP_FIRE, 3.5f, 18.3f);
@@ -57,6 +57,9 @@ void items_update(Player* p)
 	if (g_items[i].type == ITEM_EMPTY) {
 	    continue;
 	}
+	Vec2 ipos = g_items[i].sprite.pos;
+	Vec2 ppos = p->pos;
+	
 	if (player_check_collision(p, &g_items[i].sprite, 0.5f)) {
 	    player_pickup_item(p, i);
 	}

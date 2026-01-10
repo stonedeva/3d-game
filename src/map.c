@@ -44,16 +44,30 @@ void map_set(Tile tile, int map_x, int map_y)
     g_maps[map_x][map_y][g_current_map_type] = tile;
 }
 
+void map_clear(MapType type)
+{
+    for (int x = 0; x < MAP_WIDTH; x++) {
+	for (int y = 0; y < MAP_HEIGHT; y++) {
+	    g_maps[x][y][type] = 0;
+	}
+    }
+}
+
 void maps_load_from_folder()
 {
     map_load_from_png(MAP_CAVE, "./res/maps/cave.png");
     map_load_from_png(MAP_ICE, "./res/maps/ice.png");
     map_load_from_png(MAP_FIRE, "./res/maps/fire.png");
+    map_clear(MAP_OVERWORLD);
 }
 
 void map_switch(Player* p, MapType type)
 {
     g_current_map_type = type;
+    if (type == MAP_OVERWORLD) {
+	player_victory(p);
+    }
+
     p->pos.y += 0.5f;
     sound_play(SOUND_LEVEL_ENTRANCE);
     SDL_Delay(250);
