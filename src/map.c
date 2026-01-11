@@ -64,13 +64,13 @@ void maps_load_from_folder()
 void map_switch(Player* p, MapType type)
 {
     g_current_map_type = type;
-    if (type == MAP_OVERWORLD) {
-	player_victory(p);
-    }
-
     p->pos.y += 0.5f;
     sound_play(SOUND_LEVEL_ENTRANCE);
     SDL_Delay(250);
+
+    if (type == MAP_OVERWORLD) {
+	sound_play(SOUND_VICTORY);
+    }
 }
 
 float plate_timer = 0.0f;
