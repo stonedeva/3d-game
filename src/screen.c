@@ -12,38 +12,17 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <math.h>
-#include <time.h>
 
 
 double g_zbuffer[SCREEN_WIDTH] = {0};
-void screen_generate_overworld_floor();
 
 Screen screen_init(int* pixels)
 {
     Screen screen = {0};
     screen.pixels = pixels;
-
     screen.bitmap = bitmap_load("./res/bitmap.png");
-    screen_generate_overworld_floor();
 
     return screen;
-}
-
-int overworld_floor_map[MAP_WIDTH][MAP_HEIGHT] = {0};
-
-void screen_generate_overworld_floor()
-{
-    srand(time(0));
-    for (int x = 0; x < MAP_WIDTH; x++) {
-	for (int y = 0; y < MAP_HEIGHT; y++) {
-	    double r = (double)rand() / (double)RAND_MAX; // 0 - 1, 0% - 100%
-	    if (r < 0.4) {
-		overworld_floor_map[x][y] = 1;
-	    } else {
-		overworld_floor_map[x][y] = 0;
-	    }
-	}
-    }
 }
 
 void screen_render_floor(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
@@ -93,14 +72,13 @@ void screen_render_floor(Screen* screen, Vec2* dir, Vec2* plane, Vec2* pos)
 		bm_floor_index = TILE_FIRE_GROUND;
 		break;
 	    case MAP_OVERWORLD:
-		if (overworld_floor_map[cell_x % MAP_WIDTH][cell_y % MAP_HEIGHT] == 0) {
+		if (g_overworld_floor_map[cell_x % MAP_WIDTH][cell_y % MAP_HEIGHT] == 0) {
 		    bm_floor_index = TILE_OVERWORLD_GRASS_GROUND;
 		} else {
 		    bm_floor_index = TILE_OVERWORLD_DIRT_GROUND;
 		}
 		break;
 	    }
-	    bm_celling_index = bm_floor_index;
 	    if (map_get(cell_x % MAP_WIDTH, cell_y % MAP_HEIGHT) == TILE_GHOST_STONE) {
 		bm_floor_index = TILE_GHOST_STONE;
 	    }

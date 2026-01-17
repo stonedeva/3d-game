@@ -17,6 +17,7 @@ bool g_is_ghost_stones_active = 0;
 
 MapCoords ghost_stones[GHOST_STONE_CAP] = {0};
 int ghost_stone_count = 0;
+int g_overworld_floor_map[MAP_WIDTH][MAP_HEIGHT] = {0};
 
 int map_colors[TILE_COUNT] = {
     [TILE_DARK_STONE] = 0xff252323,
@@ -31,6 +32,21 @@ int map_colors[TILE_COUNT] = {
     [TILE_FIRE_LIGHT_BREAKSTONE] = 0xffa86575,
     [TILE_GHOST_STONE] = 0xffffdc00
 };
+
+void map_generate_overworld_floor()
+{
+    srand(0);
+    for (int x = 0; x < MAP_WIDTH; x++) {
+        for (int y = 0; y < MAP_HEIGHT; y++) {
+            double r = (double)rand() / (double)RAND_MAX; // 0 - 1, 0% - 100%
+            if (r < 0.4) {
+                g_overworld_floor_map[x][y] = 1;
+            } else {
+                g_overworld_floor_map[x][y] = 0;
+            }
+        }
+    }
+}
 
 Tile map_get(int map_x, int map_y)
 {
@@ -59,6 +75,7 @@ void maps_load_from_folder()
     map_load_from_png(MAP_ICE, "./res/maps/ice.png");
     map_load_from_png(MAP_FIRE, "./res/maps/fire.png");
     map_clear(MAP_OVERWORLD);
+    map_generate_overworld_floor();
 }
 
 void map_switch(Player* p, MapType type)

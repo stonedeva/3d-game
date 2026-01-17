@@ -3,9 +3,9 @@
 
 #include "./vec2.h"
 #include "./ladder.h"
-#include "./map.h"
 #include "./sprite.h"
 #include "./bitmap.h"
+#include "./map.h"
 
 #define LADDER_CAP 20
 #define LADDER_BITMAP_INDEX 26

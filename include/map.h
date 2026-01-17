@@ -47,11 +47,13 @@ typedef struct {
 extern MapType g_current_map_type;
 extern Tile g_maps[MAP_WIDTH][MAP_HEIGHT][MAP_COUNT];
 extern bool g_is_ghost_stones_active;
+extern int g_overworld_floor_map[MAP_WIDTH][MAP_HEIGHT];
 
 
 Tile map_get(int map_x, int map_y);
 void map_set(Tile tile, int map_x, int map_y);
 
+void map_generate_overworld_floor();
 void maps_load_from_folder();
 void map_load_from_png(MapType id, char* file_path);
 void map_switch(Player* p, MapType type);

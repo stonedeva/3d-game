@@ -19,7 +19,7 @@
 int tick_count = 0;
 int pixels[SCREEN_WIDTH * SCREEN_HEIGHT];
 
-int g_game_timer = 20*60;
+int g_game_timer = 40;
 GameState g_game_state = STATE_MENU;
 
 // Forward declaration
@@ -42,7 +42,9 @@ void update(float delta_time)
     tick_count++;
 }
 
-void render(SDL_Renderer* renderer, SDL_Texture* texture)
+float warn_timer = 0.0f;
+
+void render(SDL_Renderer* renderer, SDL_Texture* texture, float delta_time)
 {
     switch (g_game_state) {
     case STATE_MENU:
@@ -53,7 +55,6 @@ void render(SDL_Renderer* renderer, SDL_Texture* texture)
 	break;
     case STATE_INGAME:
 	screen_render(&screen, &player.dir, &player.plane, &player.pos);
-
 	SDL_UpdateTexture(texture, 0, pixels, SCREEN_WIDTH * sizeof(int));
 	SDL_RenderCopy(renderer, texture, 0, 0);
 	break;
@@ -96,16 +97,14 @@ void main_loop(void)
 	    delta -= 1.0;
 	}
 
-	render(renderer, texture);
+	render(renderer, texture, ns_per_tick / 1000000000.0f);
 	frames++;
 
 	if (SDL_GetTicks() - timer >= 1000) {
 	    if (g_game_timer == 0) {
 		player_game_over(&player);
 	    }
-	    if (g_game_state == STATE_INGAME) {
-		g_game_timer--;
-	    }
+	    g_game_timer--;
 
 	    char win_title[29];
 	    snprintf(win_title, sizeof(win_title), "The Maze | FPS %d | Ticks %d",

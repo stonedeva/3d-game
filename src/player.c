@@ -8,8 +8,6 @@
 #include <SDL2/SDL.h>
 #include <assert.h>
 
-#define TESTING_MODE
-
 
 Player player_init()
 {

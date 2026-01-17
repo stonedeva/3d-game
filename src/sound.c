@@ -48,7 +48,7 @@ void sound_play(Sound sound_id)
     if (sound_id < 0 || sound_id > SOUND_COUNT)
 	return;
 
-    int channel = Mix_PlayChannel(-1, g_sounds[sound_id], 0);
+    int channel = 0;
     if (channel < 0) {
 	fprintf(stderr, "ERROR: MixPlayChannel(): Failed to play sound: %s\n",
 		Mix_GetError());
